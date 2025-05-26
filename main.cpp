@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <iostream>
 #include <vector>
-
+// test brancha 
 Model ImportSTLModel(const char* filename) {
     if (!std::filesystem::exists(filename)) {
         std::cerr << "Plik STL nie istnieje: " << filename << std::endl;
@@ -44,7 +44,7 @@ int main() {
     camera.fovy = 45.0f;                                // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;
 
-    // Za³aduj model STL (upewnij siê, ¿e plik istnieje w katalogu projektu)
+    // Zaï¿½aduj model STL (upewnij siï¿½, ï¿½e plik istnieje w katalogu projektu)
 
     std::vector <Model> model;
 	std::vector<std::string> fileNames = listFilesInDirectory("model/");
@@ -54,7 +54,7 @@ int main() {
         if (loadedModel.meshCount > 0) {
             model.push_back(loadedModel);
         } else {
-            std::cerr << "Nie uda³o siê za³adowaæ modelu: " << filePath << std::endl;
+            std::cerr << "Nie udaï¿½o siï¿½ zaï¿½adowaï¿½ modelu: " << filePath << std::endl;
         }
 	}
     
