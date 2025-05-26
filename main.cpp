@@ -43,7 +43,7 @@ int main() {
     camera.up = { 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
     camera.fovy = 45.0f;                                // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;
-    SetCameraMode(camera, CAMERA_FREE);
+    //SetCameraMode(camera, CAMERA_FREE);
 
     // Za�aduj model STL (upewnij si�, �e plik istnieje w katalogu projektu)
 
@@ -63,7 +63,7 @@ int main() {
     Vector3 position = { 0.0f, 0.0f, 0.0f };
 
     while (!WindowShouldClose()) {
-        UpdateCamera(&camera, );
+        UpdateCamera(&camera, CAMERA_ORBITAL);
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
