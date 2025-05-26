@@ -62,7 +62,7 @@ int main() {
     Vector3 position = { 0.0f, 0.0f, 0.0f };
 
     while (!WindowShouldClose()) {
-        UpdateCamera(&camera, );
+        UpdateCamera(&camera, CAMERA_THIRD_PERSON);
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
