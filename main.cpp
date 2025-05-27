@@ -249,11 +249,6 @@ int main() {
 
         BeginMode3D(camera);
 
-        for(int i = 0; i < model.size(); i++) {
-            DrawModel(model[i], position, 1.0f, GRAY);
-		}
-
-
         for (czesc& part : czesci) {
             part.Draw();
         }
