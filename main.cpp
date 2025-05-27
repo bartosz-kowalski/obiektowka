@@ -34,33 +34,18 @@ std::vector<std::string> listFilesInDirectory(const std::string& folderPath) {
     return objFiles;
 }
 
-void Menu()
+void WolajGuzik()
 {
-    
-    InitWindow(800, 600, "Menu");
-    SetTargetFPS(24);
-    Guzik Przyklad{ "Menu/Pierdas.png", {215, 202} };
-    
 
-    Texture2D background = LoadTexture("Menu/back.JPG");
-
-    while (WindowShouldClose() == false)
-    {
-        BeginDrawing();
-        ClearBackground(BLACK);
-        DrawTexture(background, 0, 0, WHITE);
-        Przyklad.Draw();
-        EndDrawing();
-    }
-    CloseWindow();
 }
-
 int main() {
     //std::cout << "Working directory: " << std::filesystem::current_path() << "\n";
-    Menu();
+    
     InitWindow(800, 600, "Wizualizacja nawijarki");
     SetTargetFPS(60);
-
+    Guzik Guzik1{ "Menu/Guzik1.png", {64, 32} };
+    Guzik Guzik2{ "Menu/Guzik2.png", {138, 32} };
+    Guzik Guzik3{ "Menu/Guzik3.png", {212, 32} };
     Camera3D camera = { 0 };
     camera.position = { 0.0f, 10.0f, 10.0f };  // Camera position
     camera.target = { 0.0f, 0.0f, 0.0f };      // Camera looking at point
@@ -87,6 +72,22 @@ int main() {
     Vector3 position = { 0.0f, 0.0f, 0.0f };
 
     while (!WindowShouldClose()) {
+        Vector2 mousePosition = GetMousePosition();
+        bool mousePressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+
+        if (Guzik1.Wcisniety(mousePosition, mousePressed))
+        {
+            std::cout << "Guzik1 wcisniety" << std::endl;
+        }
+        if (Guzik2.Wcisniety(mousePosition, mousePressed))
+        {
+            std::cout << "Guzik2 wcisniety" << std::endl;
+        }
+        if (Guzik3.Wcisniety(mousePosition, mousePressed))
+        {
+            std::cout << "Guzik3 wcisniety" << std::endl;
+        }
+
         UpdateCamera(&camera, CAMERA_THIRD_PERSON);
 
         BeginDrawing();
@@ -96,9 +97,13 @@ int main() {
         for(int i = 0; i < model.size(); i++) {
             DrawModel(model[i], position, 1.0f, GRAY);
 		}
+
         DrawGrid(10, 1.0f);
         EndMode3D();
 
+        Guzik1.Draw();
+        Guzik2.Draw();
+        Guzik3.Draw();
         //DrawText("Wczytano model STL", 10, 10, 20, DARKGRAY);
         EndDrawing();
     }
