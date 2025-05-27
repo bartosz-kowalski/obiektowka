@@ -5,12 +5,9 @@
 #include <filesystem>
 #include <iostream>
 #include <vector>
-
+#include <fstream>
 #include "guzik.hpp"
 #include "guzik.cpp"
-// JakubQ test
-
-#include <fstream>
 
 class czesc {
 private:
@@ -180,9 +177,8 @@ int main() {
     camera.position = { 10.0f, 2.0f, 10.0f };  // Camera position
     camera.target = { 0.0f, 0.0f, 0.0f };      // Camera looking at point
     camera.up = { 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-    camera.fovy = 60.0f;                                // Camera field-of-view Y
+    camera.fovy = 60.0f;                                
     camera.projection = CAMERA_PERSPECTIVE;
-    //SetCameraMode(camera, CAMERA_FREE);
 
 
     std::vector <czesc> czesci;
@@ -221,9 +217,6 @@ int main() {
             std::cerr << "Nie udało się załadować modelu: " << filePath << std::endl;
         }
     }
-    
-
-    Vector3 position = { 0.0f, 0.0f, 0.0f };
 
     while (!WindowShouldClose()) {
         Vector2 mousePosition = GetMousePosition();
