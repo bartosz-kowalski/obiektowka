@@ -1,11 +1,13 @@
-#include "raylib.h"
+#include <raylib.h>
 #include "raymath.h"
 #include "rlgl.h"
 #include <string>
 #include <filesystem>
 #include <iostream>
 #include <vector>
-// test brancha 
+#include "guzik.hpp"
+#include "guzik.cpp"
+// JakubQ test
 Model ImportSTLModel(const char* filename) {
     if (!std::filesystem::exists(filename)) {
         std::cerr << "Plik STL nie istnieje: " << filename << std::endl;
@@ -32,8 +34,30 @@ std::vector<std::string> listFilesInDirectory(const std::string& folderPath) {
     return objFiles;
 }
 
+void Menu()
+{
+    
+    InitWindow(800, 600, "Menu");
+    SetTargetFPS(24);
+    Guzik Przyklad{ "Menu/Pierdas.png", {215, 202} };
+    
+
+    Texture2D background = LoadTexture("Menu/back.JPG");
+
+    while (WindowShouldClose() == false)
+    {
+        BeginDrawing();
+        ClearBackground(BLACK);
+        DrawTexture(background, 0, 0, WHITE);
+        Przyklad.Draw();
+        EndDrawing();
+    }
+    CloseWindow();
+}
+
 int main() {
     //std::cout << "Working directory: " << std::filesystem::current_path() << "\n";
+    Menu();
     InitWindow(800, 600, "Wizualizacja nawijarki");
     SetTargetFPS(60);
 
