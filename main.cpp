@@ -13,7 +13,7 @@ private:
     Vector3 position = { 0, 0, 0 };
     Vector3 rotationAxis = { 0, 1, 0 };
     float rotationAngle = 0.0f;
-    Vector3 scale = { 1, 1, 1 };
+    Vector3 scale = { 0.0001, 0.0001, 0.0001 };
     const bool movable = false;
     std::string name; 
 
@@ -28,12 +28,12 @@ public:
         : model(m), position(pos), name(n), movable(mov) {
         rotationAxis = { 0, 1, 0 };
         rotationAngle = 0.0f;
-        scale = { 1, 1, 1 };
+        scale = { 0.01, 0.01, 0.01 };
 	}
 
     ~czesc() {
 
-        UnloadModel(model);
+        //UnloadModel(model);
     }
 
     void setPosition(Vector3 pos) {
@@ -86,7 +86,6 @@ public:
             rotationAngle += 45.0f * dt; 
         }
     }
-
 };
 
 Model ImportSTLModel(const char* filename) {
@@ -127,35 +126,81 @@ std::ifstream openFile(const std::string& filePath) {
     return file;
 }
 
+bool movableLine(const std::string& line) {
+    return line.find("true") != std::string::npos;
+}
+
+Vector3 positionLine(const std::string& line) {
+    Vector3 result = { 0 };
+
+    // Znajdź początek nawiasu
+    size_t start = line.find('{');
+    size_t end = line.find('}');
+    if (start == std::string::npos || end == std::string::npos) return result;
+
+    std::string vecString = line.substr(start + 1, end - start - 1); // "-10, -10, 0"
+
+    std::istringstream iss(vecString);
+    std::string val;
+    std::vector<float> values;
+
+    while (std::getline(iss, val, ',')) {
+        values.push_back(std::stof(val));
+    }
+
+    if (values.size() == 3) {
+        result.x = values[0];
+        result.z = values[1];
+        result.y = values[2];
+    }
+
+    return result;
+}
+
 int main() {
     //std::cout << "Working directory: " << std::filesystem::current_path() << "\n";
     InitWindow(800, 600, "Wizualizacja nawijarki");
     SetTargetFPS(60);
 
     Camera3D camera = { 0 };
-    camera.position = { 100.0f, 20.0f, 100.0f };  // Camera position
+    camera.position = { 10.0f, 2.0f, 10.0f };  // Camera position
     camera.target = { 0.0f, 0.0f, 0.0f };      // Camera looking at point
     camera.up = { 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
     camera.fovy = 60.0f;                                // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;
     //SetCameraMode(camera, CAMERA_FREE);
 
-    // Za�aduj model STL (upewnij si�, �e plik istnieje w katalogu projektu)
 
     std::vector <czesc> czesci;
 	std::vector <std::string> txtFileNames;
 	std::vector<std::string> fileNames = listFilesInDirectory("model/", txtFileNames);
 
-    for (const std::string& fileName : fileNames) {
+    for (int i = 0; i < fileNames.size(); i++) {
+        std::string fileName = fileNames[i];
+        std::string txtFileName = txtFileNames[i];
         std::string filePath = "model/" + fileName;
+        std::string txtFilePath = "model/" + txtFileName;
+
         Model loadedModel = ImportSTLModel(filePath.c_str());
 
         if (loadedModel.meshCount > 0) {
+            std::ifstream file(txtFilePath);
+            std::string line;
+            Vector3 pos = { 0 };
+            bool move = false;
 
-            czesc part(loadedModel, pos, fileName, mov);
+            while (std::getline(file, line)) {
+                if (line.find("position:") != std::string::npos) {
+                    pos = positionLine(line);
+                }
+                else if (line.find("movable:") != std::string::npos) {
+                    move = movableLine(line);
+                }
+            }
 
-            // Przykładowe ustawienie pozycji (np. zależne od indeksu)
-            part.position = { 0.0f, 0.0f, (float)czesci.size() * 2.0f };
+            file.close();
+
+            czesc part(loadedModel, pos, fileName, move);
             czesci.push_back(part);
         }
         else {
@@ -182,7 +227,6 @@ int main() {
         //DrawText("Wczytano model STL", 10, 10, 20, DARKGRAY);
         EndDrawing();
     }
-
 
     CloseWindow();
     return 0;
