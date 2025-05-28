@@ -1,0 +1,2 @@
+position: {-10, -10, 0}
+movable: false \n 
