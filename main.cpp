@@ -1,16 +1,15 @@
 #include <raylib.h>
-#include "raymath.h"
-#include "rlgl.h"
+#include <raymath.h>
+#include <rlgl.h>
+
 #include <string>
 #include <filesystem>
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 #include "guzik.hpp"
 #include "guzik.cpp"
-// JakubQ test
-
-#include <fstream>
 
 class czesc {
 private:
@@ -91,6 +90,10 @@ public:
             rotationAngle += 45.0f * dt; 
         }
     }
+
+    void deleteCzesc() {
+        UnloadModel(model);
+    }
 };
 
 
@@ -124,10 +127,6 @@ std::vector<std::string> listFilesInDirectory(const std::string& folderPath, std
     return objFiles;
 }
 
-void WolajGuzik()
-{
-
-}
 std::ifstream openFile(const std::string& filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
@@ -167,11 +166,20 @@ Vector3 positionLine(const std::string& line) {
     return result;
 }
 
+void deleteModels(std::vector <czesc> czesci)
+{
+    for (czesc& part : czesci)
+    {
+        part.deleteCzesc();
+    }
+}
+
 int main() {
     //std::cout << "Working directory: " << std::filesystem::current_path() << "\n";
     
-    InitWindow(800, 600, "Wizualizacja nawijarki");
+    InitWindow(1000, 800, "Wizualizacja nawijarki");
     SetTargetFPS(60);
+
     Guzik Xplus{ "Menu/Xplus.png", {64, 32} };
     Guzik Xmin{ "Menu/Xmin.png", {138, 32} };
     Guzik TRplus{ "Menu/TRplus.png", {212, 32} };
@@ -180,14 +188,14 @@ int main() {
     Guzik MAmin{ "Menu/MAmin.png", {432, 32} };
     Guzik STOP{ "Menu/STOP.png", {600, 32} };
     Guzik START{ "Menu/START.png", {674, 32} };
+
     Camera3D camera = { 0 };
-    camera.position = { 10.0f, 2.0f, 10.0f };  // Camera position
+    camera.position = { 1.0f, 10.0f, 0.0f };  // Camera position
     camera.target = { 0.0f, 0.0f, 0.0f };      // Camera looking at point
     camera.up = { 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-    camera.fovy = 60.0f;                       // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;
-    //SetCameraMode(camera, CAMERA_FREE);
+    camera.fovy = 60.0f;                                
 
+    camera.projection = CAMERA_PERSPECTIVE;
 
     std::vector <czesc> czesci;
 	std::vector <std::string> txtFileNames;
@@ -225,11 +233,30 @@ int main() {
             std::cerr << "Nie udało się załadować modelu: " << filePath << std::endl;
         }
     }
-    
 
-    Vector3 position = { 0.0f, 0.0f, 0.0f };
+    Shader shader = LoadShader("lighting.vs", "lighting.fs");
+
+    int lightPosLoc = GetShaderLocation(shader, "lightPos");
+    int viewPosLoc = GetShaderLocation(shader, "viewPos");
+    int lightColorLoc = GetShaderLocation(shader, "lightColor");
+    int objectColorLoc = GetShaderLocation(shader, "objectColor");
+
+    Vector3 lightPos = { 2.0f, 4.0f, 2.0f };
+    Vector4 lightColor = { 1.0f, 1.0f, 1.0f, 1.0f }; 
+    Vector4 objectColor = { 0.5f, 0.5f, 0.5f, 1.0f }; 
+
+    for (czesc& part : czesci)
+    {
+        part.getModel().materials[0].shader = shader;
+    }
 
     while (!WindowShouldClose()) {
+
+        SetShaderValue(shader, lightPosLoc, &lightPos, SHADER_UNIFORM_VEC3);
+        SetShaderValue(shader, viewPosLoc, &camera.position, SHADER_UNIFORM_VEC3);
+        SetShaderValue(shader, lightColorLoc, &lightColor, SHADER_UNIFORM_VEC4);
+        SetShaderValue(shader, objectColorLoc, &objectColor, SHADER_UNIFORM_VEC4);
+
         Vector2 mousePosition = GetMousePosition();
         bool mousePressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
@@ -242,13 +269,23 @@ int main() {
             std::cout << "Guzik2 wcisniety" << std::endl;
         }
 
+        if (IsKeyPressed(KEY_S)&&IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            Ray ray = GetMouseRay(GetMousePosition(), camera);
+            float t = -ray.position.z / ray.direction.z;
+            Vector3 hitPoint = {
+                ray.position.x + ray.direction.x * t,
+                ray.position.y + ray.direction.y * t,
+                0.0f  // bo płaszczyzna Z = 0
+            };
+            camera.target = hitPoint;
+        }
+
         UpdateCamera(&camera, CAMERA_THIRD_PERSON);
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
         BeginMode3D(camera);
-
 
         for (czesc& part : czesci) {
             part.Draw();
@@ -265,10 +302,12 @@ int main() {
         MAplus.Draw();
         STOP.Draw();
         START.Draw();
-        //DrawText("Wczytano model STL", 10, 10, 20, DARKGRAY);
+
         EndDrawing();
     }
 
+    UnloadShader(shader);
+    deleteModels(czesci);
     CloseWindow();
     return 0;
 }
