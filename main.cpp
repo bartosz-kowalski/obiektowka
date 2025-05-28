@@ -34,7 +34,7 @@ std::vector<std::string> listFilesInDirectory(const std::string& folderPath) {
     return objFiles;
 }
 
-void WolajGuzik()
+void RysujGuzik()
 {
 
 }
@@ -43,9 +43,14 @@ int main() {
     
     InitWindow(800, 600, "Wizualizacja nawijarki");
     SetTargetFPS(60);
-    Guzik Guzik1{ "Menu/Guzik1.png", {64, 32} };
-    Guzik Guzik2{ "Menu/Guzik2.png", {138, 32} };
-    Guzik Guzik3{ "Menu/Guzik3.png", {212, 32} };
+    Guzik Xplus{ "Menu/Xplus.png", {64, 32} };
+    Guzik Xmin{ "Menu/Xmin.png", {138, 32} };
+    Guzik TRplus{ "Menu/TRplus.png", {212, 32} };
+    Guzik TRmin{ "Menu/TRmin.png", {284, 32} };
+    Guzik MAplus{ "Menu/MAplus.png", {358, 32} };
+    Guzik MAmin{ "Menu/MAmin.png", {432, 32} };
+    Guzik STOP{ "Menu/STOP.png", {600, 32} };
+    Guzik START{ "Menu/START.png", {674, 32} };
     Camera3D camera = { 0 };
     camera.position = { 0.0f, 10.0f, 10.0f };  // Camera position
     camera.target = { 0.0f, 0.0f, 0.0f };      // Camera looking at point
@@ -75,17 +80,13 @@ int main() {
         Vector2 mousePosition = GetMousePosition();
         bool mousePressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
-        if (Guzik1.Wcisniety(mousePosition, mousePressed))
+        if (Xplus.Wcisniety(mousePosition, mousePressed))
         {
             std::cout << "Guzik1 wcisniety" << std::endl;
         }
-        if (Guzik2.Wcisniety(mousePosition, mousePressed))
+        if (Xmin.Wcisniety(mousePosition, mousePressed))
         {
             std::cout << "Guzik2 wcisniety" << std::endl;
-        }
-        if (Guzik3.Wcisniety(mousePosition, mousePressed))
-        {
-            std::cout << "Guzik3 wcisniety" << std::endl;
         }
 
         UpdateCamera(&camera, CAMERA_THIRD_PERSON);
@@ -101,9 +102,14 @@ int main() {
         DrawGrid(10, 1.0f);
         EndMode3D();
 
-        Guzik1.Draw();
-        Guzik2.Draw();
-        Guzik3.Draw();
+        Xplus.Draw();
+        Xmin.Draw();
+        TRplus.Draw();
+        TRmin.Draw();
+        MAmin.Draw();
+        MAplus.Draw();
+        STOP.Draw();
+        START.Draw();
         //DrawText("Wczytano model STL", 10, 10, 20, DARKGRAY);
         EndDrawing();
     }

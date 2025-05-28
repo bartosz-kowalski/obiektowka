@@ -1,4 +1,5 @@
 #include "guzik.hpp"
+#include "raylib.h"
 
 Guzik::Guzik(const char* imagePath, Vector2 imagePosition)
 {
