@@ -22,16 +22,16 @@ private:
     std::string name; 
 
 public:
-    czesc(Model m, Vector3 pos, Vector3 axis, float angle, Vector3 s, std::string n, const bool mov)
+    czesc(Model m, Vector3 pos, Vector3 axis, float angle, Vector3 s, std::string n, const bool mov, Vector3 rotationAx)
 		: model(m), position(pos), rotationAxis(axis), rotationAngle(angle), scale(s), name(n), movable(mov) {
     }
 
 	czesc() : model(), position({ 0, 0, 0 }), rotationAxis({ 0, 1, 0 }), rotationAngle(0.0f), scale({ 1, 1, 1 }), movable(false) {} 
 
-    czesc(Model m, Vector3 pos, std::string n, const bool mov)
+    czesc(Model m, Vector3 pos, std::string n, const bool mov, Vector3 rotationAx, float angle)
         : model(m), position(pos), name(n), movable(mov) {
-        rotationAxis = { 0, 1, 0 };
-        rotationAngle = 0.0f;
+        rotationAxis = rotationAx;
+        rotationAngle = angle;
         scale = { 0.01, 0.01, 0.01 };
 	}
 
@@ -225,9 +225,15 @@ int main() {
             }
 
             file.close();
-
-            czesc part(loadedModel, pos, fileName, move);
-            czesci.push_back(part);
+            if (fileName != "Motor Gear.obj") {
+                czesc part(loadedModel, pos, fileName, move, { 0, 1, 0 }, 0.0f);
+                czesci.push_back(part);
+            }
+            else{
+                czesc part(loadedModel, pos, fileName, move, { 0, 1, 0 }, 90.0f);
+                //part.setRotationAxis({ 1, 0, 0 });
+                czesci.push_back(part);
+            }
         }
         else {
             std::cerr << "Nie udało się załadować modelu: " << filePath << std::endl;
