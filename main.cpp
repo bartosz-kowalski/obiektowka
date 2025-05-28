@@ -234,7 +234,7 @@ int main() {
     int lightColorLoc = GetShaderLocation(shader, "lightColor");
     int objectColorLoc = GetShaderLocation(shader, "objectColor");
 
-    Vector3 lightPos = { 2.0f, 4.0f, 2.0f };
+    Vector3 lightPos = { 0.0f, 4.0f, 0.0f };
     Vector4 lightColor = { 1.0f, 1.0f, 1.0f, 1.0f }; 
     Vector4 objectColor = { 0.5f, 0.5f, 0.5f, 1.0f }; 
 
@@ -264,17 +264,6 @@ int main() {
         if (Guzik3.Wcisniety(mousePosition, mousePressed))
         {
             std::cout << "Guzik3 wcisniety" << std::endl;
-        }
-
-        if (IsKeyPressed(KEY_S)&&IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            Ray ray = GetMouseRay(GetMousePosition(), camera);
-            float t = -ray.position.z / ray.direction.z;
-            Vector3 hitPoint = {
-                ray.position.x + ray.direction.x * t,
-                ray.position.y + ray.direction.y * t,
-                0.0f  // bo płaszczyzna Z = 0
-            };
-            camera.target = hitPoint;
         }
 
         UpdateCamera(&camera, CAMERA_THIRD_PERSON);
