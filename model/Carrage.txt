@@ -1,2 +1,2 @@
-position: {-1, -1, 0}
-movable: false \n 
+position: {-6.5, -0.16, 0.65}
+movable: true 
