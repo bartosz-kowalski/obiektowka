@@ -88,6 +88,10 @@ public:
             rotationAngle += 45.0f * dt; 
         }
     }
+
+    void deleteCzesc() {
+        UnloadModel(model);
+    }
 };
 
 
@@ -163,6 +167,14 @@ Vector3 positionLine(const std::string& line) {
     }
 
     return result;
+}
+
+void deleteModels(std::vector <czesc> czesci)
+{
+    for (czesc& part : czesci)
+    {
+        part.deleteCzesc();
+    }
 }
 
 int main() {
@@ -255,6 +267,8 @@ int main() {
         //DrawText("Wczytano model STL", 10, 10, 20, DARKGRAY);
         EndDrawing();
     }
+
+    deleteModels(czesci);
 
     CloseWindow();
     return 0;
