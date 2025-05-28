@@ -179,15 +179,22 @@ int main() {
     
     InitWindow(1000, 800, "Wizualizacja nawijarki");
     SetTargetFPS(60);
-    Guzik Guzik1{ "Menu/Guzik1.png", {64, 32} };
-    Guzik Guzik2{ "Menu/Guzik2.png", {138, 32} };
-    Guzik Guzik3{ "Menu/Guzik3.png", {212, 32} };
+
+    Guzik Xplus{ "Menu/Xplus.png", {64, 32} };
+    Guzik Xmin{ "Menu/Xmin.png", {138, 32} };
+    Guzik TRplus{ "Menu/TRplus.png", {212, 32} };
+    Guzik TRmin{ "Menu/TRmin.png", {284, 32} };
+    Guzik MAplus{ "Menu/MAplus.png", {358, 32} };
+    Guzik MAmin{ "Menu/MAmin.png", {432, 32} };
+    Guzik STOP{ "Menu/STOP.png", {600, 32} };
+    Guzik START{ "Menu/START.png", {674, 32} };
 
     Camera3D camera = { 0 };
     camera.position = { 1.0f, 10.0f, 0.0f };  // Camera position
     camera.target = { 0.0f, 0.0f, 0.0f };      // Camera looking at point
     camera.up = { 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
     camera.fovy = 60.0f;                                
+
     camera.projection = CAMERA_PERSPECTIVE;
 
     std::vector <czesc> czesci;
@@ -253,17 +260,13 @@ int main() {
         Vector2 mousePosition = GetMousePosition();
         bool mousePressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
-        if (Guzik1.Wcisniety(mousePosition, mousePressed))
+        if (Xplus.Wcisniety(mousePosition, mousePressed))
         {
             std::cout << "Guzik1 wcisniety" << std::endl;
         }
-        if (Guzik2.Wcisniety(mousePosition, mousePressed))
+        if (Xmin.Wcisniety(mousePosition, mousePressed))
         {
             std::cout << "Guzik2 wcisniety" << std::endl;
-        }
-        if (Guzik3.Wcisniety(mousePosition, mousePressed))
-        {
-            std::cout << "Guzik3 wcisniety" << std::endl;
         }
 
         if (IsKeyPressed(KEY_S)&&IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -291,9 +294,14 @@ int main() {
         DrawGrid(10, 1.0f);
         EndMode3D();
 
-        Guzik1.Draw();
-        Guzik2.Draw();
-        Guzik3.Draw();
+        Xplus.Draw();
+        Xmin.Draw();
+        TRplus.Draw();
+        TRmin.Draw();
+        MAmin.Draw();
+        MAplus.Draw();
+        STOP.Draw();
+        START.Draw();
 
         EndDrawing();
     }
