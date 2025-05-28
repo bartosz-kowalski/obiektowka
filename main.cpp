@@ -184,7 +184,7 @@ int main() {
     camera.position = { 10.0f, 2.0f, 10.0f };  // Camera position
     camera.target = { 0.0f, 0.0f, 0.0f };      // Camera looking at point
     camera.up = { 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-    camera.fovy = 60.0f;                                // Camera field-of-view Y
+    camera.fovy = 60.0f;                       // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;
     //SetCameraMode(camera, CAMERA_FREE);
 
@@ -248,10 +248,6 @@ int main() {
         ClearBackground(RAYWHITE);
 
         BeginMode3D(camera);
-
-        for(int i = 0; i < model.size(); i++) {
-            DrawModel(model[i], position, 1.0f, GRAY);
-		}
 
 
         for (czesc& part : czesci) {
