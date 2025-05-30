@@ -1,2 +1,2 @@
-position: {-6.5, -0.16, 0.65}
+position: {-652.2, 0, 59.5}
 movable: true 

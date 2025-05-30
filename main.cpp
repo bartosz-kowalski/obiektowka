@@ -13,296 +13,363 @@
 
 class czesc {
 private:
-    Model model;
-    Vector3 position = { 0, 0, 0 };
-    Vector3 rotationAxis = { 0, 1, 0 };
-    float rotationAngle = 0.0f;
-    Vector3 scale = { 0.0001, 0.0001, 0.0001 };
-    const bool movable = false;
-    std::string name; 
+	Model model;
+	Vector3 position = { 0, 0, 0 };
+	Vector3 rotationAxis = { 0, 1, 0 };
+	float rotationAngle = 0.0f;
+	Vector3 scale = { 0.0001, 0.0001, 0.0001 };
+	const bool movable = false;
+	std::string name;
 
 public:
-    czesc(Model m, Vector3 pos, Vector3 axis, float angle, Vector3 s, std::string n, const bool mov, Vector3 rotationAx)
+	czesc(Model m, Vector3 pos, Vector3 axis, float angle, Vector3 s, std::string n, const bool mov, Vector3 rotationAx)
 		: model(m), position(pos), rotationAxis(axis), rotationAngle(angle), scale(s), name(n), movable(mov) {
-    }
-
-	czesc() : model(), position({ 0, 0, 0 }), rotationAxis({ 0, 1, 0 }), rotationAngle(0.0f), scale({ 1, 1, 1 }), movable(false) {} 
-
-    czesc(Model m, Vector3 pos, std::string n, const bool mov, Vector3 rotationAx, float angle)
-        : model(m), position(pos), name(n), movable(mov) {
-        rotationAxis = rotationAx;
-        rotationAngle = angle;
-        scale = { 0.01, 0.01, 0.01 };
 	}
 
-    ~czesc() {
+	czesc() : model(), position({ 0, 0, 0 }), rotationAxis({ 0, 1, 0 }), rotationAngle(0.0f), scale({ 1, 1, 1 }), movable(false) {}
 
-        //UnloadModel(model);
-    }
-
-    void setPosition(Vector3 pos) {
-        if(movable)
-            position = pos;
+	czesc(Model m, Vector3 pos, std::string n, const bool mov, Vector3 rotationAx, float angle)
+		: model(m), position(pos), name(n), movable(mov) {
+		rotationAxis = rotationAx;
+		rotationAngle = angle;
+		scale = { 0.01, 0.01, 0.01 };
 	}
 
-    void setRotationAxis(Vector3 axis) {
-        if(movable)
-            rotationAxis = axis;
-    }
+	~czesc() {
 
-    void setRotationAngle(float angle) {
-        if (movable)
-            rotationAngle = angle;
+		//UnloadModel(model);
 	}
 
-    void setScale(Vector3 s) {
-        scale = s;
-    }
-
-    void Draw() {
-        DrawModelEx(model, position, rotationAxis, rotationAngle, scale, WHITE);
-    }
-
-    Vector3 getPosition() const {
-        return position;
+	void setPosition(Vector3 pos) {
+		if (movable)
+			position = pos;
 	}
 
-    Model getModel() const {
-		return model;   
-    }
-    std::string getName() const {
-        return name;
-    }
-    bool isMovable() const {
-        return movable;
-    }
-
-    Vector3 getScale() const {
-        return scale;
+	void setRotationAxis(Vector3 axis) {
+		if (movable)
+			rotationAxis = axis;
 	}
 
-    int getMeshCount() const {
-        return model.meshCount;
-    }
+	void setRotationAngle(float angle) {
+		if (movable)
+			rotationAngle = angle;
+	}
 
-    void Update(float dt) {
-        if (movable) {
-            rotationAngle += 45.0f * dt; 
-        }
-    }
+	void setScale(Vector3 s) {
+		scale = s;
+	}
 
-    void deleteCzesc() {
-        UnloadModel(model);
-    }
+	void Draw() {
+		//if(!movable)
+		DrawModelEx(model, position, rotationAxis, rotationAngle, scale, WHITE);
+	}
+
+	void Draw(Vector3 pos, Vector3 rot) {
+		rot.x = DEG2RAD * rot.x;
+		rot.y = DEG2RAD * rot.y;
+		rot.z = DEG2RAD * rot.z;
+
+		Matrix obrot = MatrixRotateXYZ(rot);
+		Matrix posuw = MatrixTranslate(pos.x, pos.y, pos.z);
+
+		model.transform = MatrixMultiply(posuw, obrot);
+
+		DrawModel(model, Vector3Zero(), 0.01f, WHITE);
+	}
+
+	void Draw(Vector3 pos) {
+		Matrix posuw = MatrixTranslate(pos.x, pos.y, pos.z);
+		model.transform = posuw;
+
+		DrawModel(model, Vector3Zero(), 0.01f, WHITE);
+	}
+
+	Vector3 getPosition() const{
+		return position;
+	}
+
+	Model getModel() const {
+		return model;
+	}
+	std::string getName() const {
+		return name;
+	}
+	bool isMovable() const {
+		return movable;
+	}
+
+	Vector3 getScale() const {
+		return scale;
+	}
+
+	int getMeshCount() const {
+		return model.meshCount;
+	}
+
+	void Update(float dt) {
+		if (movable) {
+			rotationAngle += 45.0f * dt;
+		}
+	}
+
+	void deleteCzesc() {
+		UnloadModel(model);
+	}
 };
 
 
 Model ImportSTLModel(const char* filename) {
-    if (!std::filesystem::exists(filename)) {
-        std::cerr << "Plik STL nie istnieje: " << filename << std::endl;
-        return Model();
+	if (!std::filesystem::exists(filename)) {
+		std::cerr << "Plik STL nie istnieje: " << filename << std::endl;
+		return Model();
 	}
 
-    return LoadModel(filename);;
+	return LoadModel(filename);;
 }
 
 std::vector<std::string> listFilesInDirectory(const std::string& folderPath, std::vector<std::string>& txtFiles) {
-    std::vector<std::string> objFiles;
+	std::vector<std::string> objFiles;
 
-    if (!std::filesystem::exists(folderPath)) {
-        std::cerr << "Folder nie istnieje: " << folderPath << std::endl;
-        return {};
-    }
+	if (!std::filesystem::exists(folderPath)) {
+		std::cerr << "Folder nie istnieje: " << folderPath << std::endl;
+		return {};
+	}
 
-    for (const auto& entry : std::filesystem::directory_iterator(folderPath)) {
-        if (entry.is_regular_file() && entry.path().extension() == ".obj") {
-            objFiles.push_back(entry.path().filename().string()); // tylko nazwa pliku 
-        }
-
-        if( entry.is_regular_file() && entry.path().extension() == ".txt") {
-            txtFiles.push_back(entry.path().filename().string()); // tylko nazwa pliku 
+	for (const auto& entry : std::filesystem::directory_iterator(folderPath)) {
+		if (entry.is_regular_file() && entry.path().extension() == ".obj") {
+			objFiles.push_back(entry.path().filename().string()); // tylko nazwa pliku 
 		}
-    }
 
-    return objFiles;
+		if (entry.is_regular_file() && entry.path().extension() == ".txt") {
+			txtFiles.push_back(entry.path().filename().string()); // tylko nazwa pliku 
+		}
+	}
+
+	return objFiles;
 }
 
 std::ifstream openFile(const std::string& filePath) {
-    std::ifstream file(filePath);
-    if (!file.is_open()) {
-        std::cerr << "Nie można otworzyć pliku: " << filePath << std::endl;
-    }
-    return file;
+	std::ifstream file(filePath);
+	if (!file.is_open()) {
+		std::cerr << "Nie można otworzyć pliku: " << filePath << std::endl;
+	}
+	return file;
 }
 
 bool movableLine(const std::string& line) {
-    return line.find("true") != std::string::npos;
+	return line.find("true") != std::string::npos;
 }
 
 Vector3 positionLine(const std::string& line) {
-    Vector3 result = { 0 };
+	Vector3 result = { 0 };
 
-    // Znajdź początek nawiasu
-    size_t start = line.find('{');
-    size_t end = line.find('}');
-    if (start == std::string::npos || end == std::string::npos) return result;
+	// Znajdź początek nawiasu
+	size_t start = line.find('{');
+	size_t end = line.find('}');
+	if (start == std::string::npos || end == std::string::npos) return result;
 
-    std::string vecString = line.substr(start + 1, end - start - 1); // "-10, -10, 0"
+	std::string vecString = line.substr(start + 1, end - start - 1); // "-10, -10, 0"
 
-    std::istringstream iss(vecString);
-    std::string val;
-    std::vector<float> values;
+	std::istringstream iss(vecString);
+	std::string val;
+	std::vector<float> values;
 
-    while (std::getline(iss, val, ',')) {
-        values.push_back(std::stof(val));
-    }
+	while (std::getline(iss, val, ',')) {
+		values.push_back(std::stof(val));
+	}
 
-    if (values.size() == 3) {
-        result.x = values[0];
-        result.z = values[1];
-        result.y = values[2];
-    }
+	if (values.size() == 3) {
+		result.x = values[0];
+		result.z = values[1];
+		result.y = values[2];
+	}
 
-    return result;
+	return result;
 }
 
 void deleteModels(std::vector <czesc> czesci)
 {
-    for (czesc& part : czesci)
-    {
-        part.deleteCzesc();
-    }
+	for (czesc& part : czesci)
+	{
+		part.deleteCzesc();
+	}
 }
 
 int main() {
-    //std::cout << "Working directory: " << std::filesystem::current_path() << "\n";
-    
-    InitWindow(1000, 800, "Wizualizacja nawijarki");
-    SetTargetFPS(60);
+	//std::cout << "Working directory: " << std::filesystem::current_path() << "\n";
 
-    Guzik Xplus{ "Menu/Xplus.png", {64, 32} };
-    Guzik Xmin{ "Menu/Xmin.png", {138, 32} };
-    Guzik TRplus{ "Menu/TRplus.png", {212, 32} };
-    Guzik TRmin{ "Menu/TRmin.png", {284, 32} };
-    Guzik MAplus{ "Menu/MAplus.png", {358, 32} };
-    Guzik MAmin{ "Menu/MAmin.png", {432, 32} };
-    Guzik STOP{ "Menu/STOP.png", {600, 32} };
-    Guzik START{ "Menu/START.png", {674, 32} };
+	InitWindow(1000, 800, "Wizualizacja nawijarki");
+	SetTargetFPS(60);
 
-    Camera3D camera = { 0 };
-    camera.position = { 1.0f, 10.0f, 0.0f };  // Camera position
-    camera.target = { 0.0f, 0.0f, 0.0f };      // Camera looking at point
-    camera.up = { 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-    camera.fovy = 60.0f;                                
+	Guzik Xplus{ "Menu/Xplus.png", {64, 32} };
+	Guzik Xmin{ "Menu/Xmin.png", {138, 32} };
+	Guzik TRplus{ "Menu/TRplus.png", {212, 32} };
+	Guzik TRmin{ "Menu/TRmin.png", {284, 32} };
+	Guzik MAplus{ "Menu/MAplus.png", {358, 32} };
+	Guzik MAmin{ "Menu/MAmin.png", {432, 32} };
+	Guzik STOP{ "Menu/STOP.png", {600, 32} };
+	Guzik START{ "Menu/START.png", {674, 32} };
 
-    camera.projection = CAMERA_PERSPECTIVE;
+	Camera3D camera = { 0 };
+	camera.position = { 1.0f, 10.0f, 0.0f };  // Camera position
+	camera.target = { 0.0f, 0.0f, 0.0f };      // Camera looking at point
+	camera.up = { 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
+	camera.fovy = 60.0f;
 
-    std::vector <czesc> czesci;
+	camera.projection = CAMERA_PERSPECTIVE;
+
+	std::vector <czesc> czesci;
 	std::vector <std::string> txtFileNames;
 	std::vector<std::string> fileNames = listFilesInDirectory("model/", txtFileNames);
 
-    for (int i = 0; i < fileNames.size(); i++) {
-        std::string fileName = fileNames[i];
-        std::string txtFileName = txtFileNames[i];
-        std::string filePath = "model/" + fileName;
-        std::string txtFilePath = "model/" + txtFileName;
+	for (int i = 0; i < fileNames.size(); i++) {
+		std::string fileName = fileNames[i];
+		std::string txtFileName = txtFileNames[i];
+		std::string filePath = "model/" + fileName;
+		std::string txtFilePath = "model/" + txtFileName;
 
-        Model loadedModel = ImportSTLModel(filePath.c_str());
+		Model loadedModel = ImportSTLModel(filePath.c_str());
 
-        if (loadedModel.meshCount > 0) {
-            std::ifstream file(txtFilePath);
-            std::string line;
-            Vector3 pos = { 0 };
-            bool move = false;
+		if (loadedModel.meshCount > 0) {
+			std::ifstream file(txtFilePath);
+			std::string line;
+			Vector3 pos = { 0 };
+			bool move = false;
 
-            while (std::getline(file, line)) {
-                if (line.find("position:") != std::string::npos) {
-                    pos = positionLine(line);
-                }
-                else if (line.find("movable:") != std::string::npos) {
-                    move = movableLine(line);
-                }
-            }
+			while (std::getline(file, line)) {
+				if (line.find("position:") != std::string::npos) {
+					pos = positionLine(line);
+				}
+				else if (line.find("movable:") != std::string::npos) {
+					move = movableLine(line);
+				}
+			}
 
-            file.close();
-            if (fileName != "Motor Gear.obj") {
-                czesc part(loadedModel, pos, fileName, move, { 0, 1, 0 }, 0.0f);
-                czesci.push_back(part);
-            }
-            else{
-                czesc part(loadedModel, pos, fileName, move, { 0, 1, 0 }, 90.0f);
-                //part.setRotationAxis({ 1, 0, 0 });
-                czesci.push_back(part);
-            }
-        }
-        else {
-            std::cerr << "Nie udało się załadować modelu: " << filePath << std::endl;
-        }
-    }
+			file.close();
+			if (fileName != "Motor Gear.obj") {
+				czesc part(loadedModel, pos, fileName, move, { 0, 1, 0 }, 0.0f);
+				czesci.push_back(part);
+			}
+			else {
+				czesc part(loadedModel, pos, fileName, move, { 0, 1, 0 }, 90.0f);
+				//part.setRotationAxis({ 1, 0, 0 });
+				czesci.push_back(part);
+			}
+		}
+		else {
+			std::cerr << "Nie udało się załadować modelu: " << filePath << std::endl;
+		}
+	}
 
-    Shader shader = LoadShader("lighting.vs", "lighting.fs");
+	Shader shader = LoadShader("lighting.vs", "lighting.fs");
 
-    int lightPosLoc = GetShaderLocation(shader, "lightPos");
-    int viewPosLoc = GetShaderLocation(shader, "viewPos");
-    int lightColorLoc = GetShaderLocation(shader, "lightColor");
-    int objectColorLoc = GetShaderLocation(shader, "objectColor");
+	int lightPosLoc = GetShaderLocation(shader, "lightPos");
+	int viewPosLoc = GetShaderLocation(shader, "viewPos");
+	int lightColorLoc = GetShaderLocation(shader, "lightColor");
+	int objectColorLoc = GetShaderLocation(shader, "objectColor");
 
-    Vector3 lightPos = { 0.0f, 4.0f, 0.0f };
-    Vector4 lightColor = { 1.0f, 1.0f, 1.0f, 1.0f }; 
-    Vector4 objectColor = { 0.5f, 0.5f, 0.5f, 1.0f }; 
+	Vector3 lightPos = { 0.0f, 4.0f, 0.0f };
+	Vector4 lightColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	Vector4 objectColor = { 0.5f, 0.5f, 0.5f, 1.0f };
 
-    for (czesc& part : czesci)
-    {
-        part.getModel().materials[0].shader = shader;
-    }
+	double yC, yM, yT, yS;
+	for (czesc& part : czesci)
+	{
+		part.getModel().materials[0].shader = shader;
+		if (part.getName() == "Carrage.obj") {
+			yC = part.getPosition().y;
+			std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
+		}
+		if (part.getName() == "Motor Gear.obj") yM = part.getPosition().y;
+		if (part.getName() == "Tool roller.obj") yT = part.getPosition().y;
+		if (part.getName() == "Spool hookers.obj") yS = part.getPosition().y;
+	}
 
-    while (!WindowShouldClose()) {
+	while (!WindowShouldClose()) {
 
-        SetShaderValue(shader, lightPosLoc, &lightPos, SHADER_UNIFORM_VEC3);
-        SetShaderValue(shader, viewPosLoc, &camera.position, SHADER_UNIFORM_VEC3);
-        SetShaderValue(shader, lightColorLoc, &lightColor, SHADER_UNIFORM_VEC4);
-        SetShaderValue(shader, objectColorLoc, &objectColor, SHADER_UNIFORM_VEC4);
+		SetShaderValue(shader, lightPosLoc, &lightPos, SHADER_UNIFORM_VEC3);
+		SetShaderValue(shader, viewPosLoc, &camera.position, SHADER_UNIFORM_VEC3);
+		SetShaderValue(shader, lightColorLoc, &lightColor, SHADER_UNIFORM_VEC4);
+		SetShaderValue(shader, objectColorLoc, &objectColor, SHADER_UNIFORM_VEC4);
 
-        Vector2 mousePosition = GetMousePosition();
-        bool mousePressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+		Vector2 mousePosition = GetMousePosition();
+		bool mousePressed = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
 
-        if (Xplus.Wcisniety(mousePosition, mousePressed))
-        {
-            std::cout << "Guzik1 wcisniety" << std::endl;
-        }
-        if (Xmin.Wcisniety(mousePosition, mousePressed))
-        {
-            std::cout << "Guzik2 wcisniety" << std::endl;
-        }
+		if (Xplus.Wcisniety(mousePosition, mousePressed))
+		{
+			yC += 1;
+			yT += 1;
+			yM -= 1;
+			yS += 1;
+		}
+		if (Xmin.Wcisniety(mousePosition, mousePressed))
+		{
+			yC -= 1;
+			yT -= 1;
+			yM += 1;
+			yS -= 1;
+		}
 
-        UpdateCamera(&camera, CAMERA_THIRD_PERSON);
+		UpdateCamera(&camera, CAMERA_THIRD_PERSON);
 
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
+		BeginDrawing();
+		ClearBackground(RAYWHITE);
 
-        BeginMode3D(camera);
+		BeginMode3D(camera);
 
-        for (czesc& part : czesci) {
-            part.Draw();
-        }
 
-        DrawGrid(10, 1.0f);
-        EndMode3D();
+		float rotation = 0;
+		int gearMod = 5;
 
-        Xplus.Draw();
-        Xmin.Draw();
-        TRplus.Draw();
-        TRmin.Draw();
-        MAmin.Draw();
-        MAplus.Draw();
-        STOP.Draw();
-        START.Draw();
+		for (czesc& part : czesci) {
+			Vector3 pos = part.getPosition();
+			if (!part.isMovable())
+				part.Draw();
+			else
+			{   //carrage, motor gear, tool roller
+				if (part.getName() == "Motor Gear.obj") {
+					pos.x = yM;
+					part.setPosition(pos);
+					part.Draw(pos, { rotation * gearMod, 90.0f, 0 });
+				}
+				else if (part.getName() == "Tool roller.obj") {
+					pos.z = yT;
+					part.setPosition(pos);
+					part.Draw(pos, { rotation, 0, 0 });
+				}
+				else if (part.getName() == "Carrage.obj") {
+					pos.z = yC;
+					part.setPosition(pos);
+					part.Draw(pos);
+				}
+				else if (part.getName() == "Spool hookers.obj") {
+					pos.z = yS;
+					part.setPosition(pos);
+					part.Draw(pos, { rotation, 0, 0 });
+				}
+				else {
+					part.Draw(pos);
+				}
+			}
+		}
 
-        EndDrawing();
-    }
+		DrawGrid(10, 1.0f);
+		EndMode3D();
 
-    UnloadShader(shader);
-    deleteModels(czesci);
-    CloseWindow();
-    return 0;
+		Xplus.Draw();
+		Xmin.Draw();
+		TRplus.Draw();
+		TRmin.Draw();
+		MAmin.Draw();
+		MAplus.Draw();
+		STOP.Draw();
+		START.Draw();
+
+		EndDrawing();
+	}
+
+	UnloadShader(shader);
+	deleteModels(czesci);
+	CloseWindow();
+	return 0;
 }
