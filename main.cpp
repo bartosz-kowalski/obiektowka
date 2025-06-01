@@ -310,8 +310,23 @@ int main() {
 			yS -= 1;
 		}
 
-		UpdateCamera(&camera, CAMERA_THIRD_PERSON);
+		//UpdateCamera(&camera, CAMERA_THIRD_PERSON);
 
+		//Ruch kamery bo mnie już wkurzało że latała cały czas
+		if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
+			Vector2 delta = GetMouseDelta();
+			camera.target = Vector3Zero();
+			camera.position = Vector3RotateByAxisAngle(camera.position, { 0, 1, 0 }, -delta.x * 0.003f);
+
+			Vector3 right = Vector3Normalize(Vector3CrossProduct(Vector3Subtract(camera.target, camera.position), camera.up));
+			camera.position = Vector3RotateByAxisAngle(camera.position, right, -delta.y * 0.003f);
+		}
+		//przybliżanie środkowym myszy
+		float wheel = GetMouseWheelMove();
+		if (wheel != 0) {
+			Vector3 forward = Vector3Normalize(Vector3Subtract(camera.target, camera.position));
+			camera.position = Vector3Add(camera.position, Vector3Scale(forward, wheel * 0.5f));
+		}
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
 
