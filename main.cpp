@@ -272,18 +272,32 @@ int main() {
 	Vector4 lightColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	Vector4 objectColor = { 0.5f, 0.5f, 0.5f, 1.0f };
 
-	double yC, yM, yT, yS;
+	double yC, yM, yT, yS, yMax, yMin;
 	for (czesc& part : czesci)
 	{
 		part.getModel().materials[0].shader = shader;
 		if (part.getName() == "Carrage.obj") {
-			yC = part.getPosition().y;
+			yMin = yC = part.getPosition().z;
 			std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
 		}
-		if (part.getName() == "Motor Gear.obj") yM = part.getPosition().y;
-		if (part.getName() == "Tool roller.obj") yT = part.getPosition().y;
-		if (part.getName() == "Spool hookers.obj") yS = part.getPosition().y;
+		if (part.getName() == "Motor Gear.obj") {
+			yM = part.getPosition().x;
+			std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
+		}
+
+		if (part.getName() == "Tool roller.obj") {
+			yT = part.getPosition().z;
+			std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
+		}
+
+		if (part.getName() == "Spool hookers.obj") {
+			yS = part.getPosition().z;
+			std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
+		}
+
 	}
+
+	yMax = 800;
 
 	while (!WindowShouldClose()) {
 
@@ -295,14 +309,15 @@ int main() {
 		Vector2 mousePosition = GetMousePosition();
 		bool mousePressed = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
 
-		if (Xplus.Wcisniety(mousePosition, mousePressed))
+		if (Xplus.Wcisniety(mousePosition, mousePressed) && yC < yMax)
 		{
 			yC += 1;
 			yT += 1;
 			yM -= 1;
 			yS += 1;
+			std::cout << yC << '\n';
 		}
-		if (Xmin.Wcisniety(mousePosition, mousePressed))
+		if (Xmin.Wcisniety(mousePosition, mousePressed) && yC > yMin)
 		{
 			yC -= 1;
 			yT -= 1;
@@ -320,6 +335,8 @@ int main() {
 
 			Vector3 right = Vector3Normalize(Vector3CrossProduct(Vector3Subtract(camera.target, camera.position), camera.up));
 			camera.position = Vector3RotateByAxisAngle(camera.position, right, -delta.y * 0.003f);
+
+			UpdateCamera(&camera, CAMERA_FIRST_PERSON);
 		}
 		//przybliżanie środkowym myszy
 		float wheel = GetMouseWheelMove();
@@ -362,7 +379,7 @@ int main() {
 					part.setPosition(pos);
 					part.Draw(pos, { rotation, 0, 0 });
 				}
-				else {
+				else if(part.getName() == "Mandrel.obj") {
 					part.Draw(pos);
 				}
 			}
