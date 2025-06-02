@@ -76,6 +76,18 @@ public:
 
 		DrawModel(model, Vector3Zero(), 0.01f, WHITE);
 	}
+	void Draw2(Vector3 pos, Vector3 rot) {
+		rot.x = DEG2RAD * rot.x;
+		rot.y = DEG2RAD * rot.y;
+		rot.z = DEG2RAD * rot.z;
+
+		Matrix obrot = MatrixRotateXYZ(rot);
+		Matrix posuw = MatrixTranslate(pos.x, pos.y, pos.z);
+
+		model.transform = MatrixMultiply(obrot, posuw);
+
+		DrawModel(model, Vector3Zero(), 0.01f, WHITE);
+	}
 
 	void Draw(Vector3 pos) {
 		Matrix posuw = MatrixTranslate(pos.x, pos.y, pos.z);
@@ -197,6 +209,8 @@ void deleteModels(std::vector <czesc> czesci)
 
 int main() {
 	//std::cout << "Working directory: " << std::filesystem::current_path() << "\n";
+	bool automat = false;
+	float rotationTR = 0.0;
 
 	InitWindow(1000, 800, "Wizualizacja nawijarki");
 	SetTargetFPS(60);
@@ -207,8 +221,8 @@ int main() {
 	Guzik TRmin{ "Menu/TRmin.png", {284, 32} };
 	Guzik MAplus{ "Menu/MAplus.png", {358, 32} };
 	Guzik MAmin{ "Menu/MAmin.png", {432, 32} };
-	Guzik STOP{ "Menu/STOP.png", {600, 32} };
-	Guzik START{ "Menu/START.png", {674, 32} };
+	Guzik DWUR{ "Menu/DwuR.png", {730, 32} };
+	Guzik DWUA{ "Menu/DwuA.png", {730, 32} };
 
 	Camera3D camera = { 0 };
 	camera.position = { 1.0f, 10.0f, 0.0f };  // Camera position
@@ -308,22 +322,42 @@ int main() {
 
 		Vector2 mousePosition = GetMousePosition();
 		bool mousePressed = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
-
+		bool mouseReleased = IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
+		if (DWUR.Wcisniety(mousePosition, mouseReleased) or DWUA.Wcisniety(mousePosition, mouseReleased))
+		{
+			automat = !automat;
+			std::cout << "Zmiana trybu" << std::endl;
+		}
+		if (automat == false)
+		{
 		if (Xplus.Wcisniety(mousePosition, mousePressed) && yC < yMax)
-		{
-			yC += 1;
-			yT += 1;
-			yM -= 1;
-			yS += 1;
-			std::cout << yC << '\n';
+			{
+				yC += 1;
+				yT += 1;
+				yM -= 1;
+				yS += 1;
+				std::cout << yC << '\n';
+			}
+			if (Xmin.Wcisniety(mousePosition, mousePressed) && yC > yMin)
+			{
+				yC -= 1;
+				yT -= 1;
+				yM += 1;
+				yS -= 1;
+			}
+			if (TRplus.Wcisniety(mousePosition, mousePressed))
+			{
+				rotationTR += 2.0f;
+				std::cout << "Obrót TR+: " << rotationTR << " stopni\n";
+			}
+
+			if (TRmin.Wcisniety(mousePosition, mousePressed))
+			{
+				rotationTR -= 2.0f;
+				std::cout << "Obrót TR-: " << rotationTR << " stopni\n";
+			}
 		}
-		if (Xmin.Wcisniety(mousePosition, mousePressed) && yC > yMin)
-		{
-			yC -= 1;
-			yT -= 1;
-			yM += 1;
-			yS -= 1;
-		}
+		
 
 		//UpdateCamera(&camera, CAMERA_THIRD_PERSON);
 
@@ -363,11 +397,18 @@ int main() {
 					pos.x = yM;
 					part.setPosition(pos);
 					part.Draw(pos, { rotation * gearMod, 90.0f, 0 });
+
 				}
 				else if (part.getName() == "Tool roller.obj") {
+					//rlPushMatrix();
+					//rlTranslatef(pos.x,pos.y,pos.z);
+					//rlRotatef(rotationTR, pos.x, pos.y, pos.z);
+					//rlTranslatef(-pos.x, -pos.y, -pos.z);
 					pos.z = yT;
 					part.setPosition(pos);
-					part.Draw(pos, { rotation, 0, 0 });
+					part.Draw2(pos, { rotationTR, 0, 0 });
+					//DrawModelEx(part.getModel(), {0,0,0}, {1, 0, 0}, rotationTR, {0.01,0.01,0.01}, WHITE);
+					//rlPopMatrix();
 				}
 				else if (part.getName() == "Carrage.obj") {
 					pos.z = yC;
@@ -394,8 +435,15 @@ int main() {
 		TRmin.Draw();
 		MAmin.Draw();
 		MAplus.Draw();
-		STOP.Draw();
-		START.Draw();
+		if (automat == false)
+		{
+		DWUR.Draw();
+		}
+		else
+		{
+		DWUA.Draw();
+		}
+		
 
 		EndDrawing();
 	}

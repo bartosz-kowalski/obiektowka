@@ -23,6 +23,8 @@ void Guzik::Draw()
     DrawTextureV(texture, position, WHITE);
 }
 
+
+
 bool Guzik::Wcisniety(Vector2 mousePos, bool mousePressed)
 {
     Rectangle rect = { position.x, position.y, static_cast<float>(texture.width), static_cast<float>(texture.height) };
