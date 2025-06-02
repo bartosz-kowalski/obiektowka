@@ -311,6 +311,7 @@ int main() {
 	std::ifstream gcode;
 	std::string linia;
 	FilePathList droppedFiles;
+	int iterator = 0;
 
 	while (!WindowShouldClose()) {
 
@@ -385,7 +386,7 @@ int main() {
 				}
 			}
 		}
-		if (working) {
+		if (working && iterator % 10 == 0) {
 			/*std::string buffer;
 			for (int i = 0; i < index; i++) {
 				std::getline(gcode, buffer);
@@ -412,7 +413,7 @@ int main() {
 					}
 				}
 			}
-			if (gcode.eof()) { gcode.close(); UnloadDroppedFiles(droppedFiles); automat = !automat; working = false; }
+			if (gcode.eof()) { gcode.close(); UnloadDroppedFiles(droppedFiles); automat = !automat; working = false; iterator = 0; }
 		}
 
 		//Ruch kamery bo mnie już wkurzało że latała cały czas
