@@ -116,7 +116,6 @@ public:
 	}
 };
 
-
 Model ImportSTLModel(const char* filename) {
 	if (!std::filesystem::exists(filename)) {
 		std::cerr << "Plik STL nie istnieje: " << filename << std::endl;
@@ -192,6 +191,13 @@ void deleteModels(std::vector <czesc> czesci)
 	{
 		part.deleteCzesc();
 	}
+}
+
+float normalize(float min, float value, float max) {
+	float min_x = 0;
+	float max_x = 100;
+	if (max_x - min_x == 0) return min;
+	return min + ((value - min_x) / (max_x - min_x)) * (max - min);
 }
 
 int main() {
@@ -273,32 +279,38 @@ int main() {
 	Vector4 lightColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	Vector4 objectColor = { 0.5f, 0.5f, 0.5f, 1.0f };
 
-	double yC, yM, yT, yS, yMax, yMin;
+	double yC, yM, yT, yS, yCm, yMm, yTm, ySm, yCM, yMM, yTM, ySM;
 	for (czesc& part : czesci)
 	{
 		part.getModel().materials[0].shader = shader;
 		if (part.getName() == "Carrage.obj") {
-			yMin = yC = part.getPosition().z;
+			yC = yCm = part.getPosition().z;
 			//std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
 		}
 		if (part.getName() == "Motor Gear.obj") {
-			yM = part.getPosition().z;
+			yM = yMm = part.getPosition().z;
 			//std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
 		}
 
 		if (part.getName() == "Tool roller.obj") {
-			yT = part.getPosition().z;
+			yT = yTm = part.getPosition().z;
 			//std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
 		}
 
 		if (part.getName() == "Spool hookers.obj") {
-			yS = part.getPosition().z;
+			yS = ySm = part.getPosition().z;
 			//std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
 		}
 
 	}
 
-	yMax = 800;
+	yCM = 800;
+	yMM = ySM = 400;
+	yTM = 401;
+	bool working = false;
+	std::ifstream gcode;
+	std::string linia;
+	FilePathList droppedFiles;
 
 	while (!WindowShouldClose()) {
 
@@ -310,14 +322,13 @@ int main() {
 		Vector2 mousePosition = GetMousePosition();
 		bool mousePressed = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
 		bool mouseReleased = IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
-		if (DWUR.Wcisniety(mousePosition, mouseReleased) or DWUA.Wcisniety(mousePosition, mouseReleased))
+		if ((DWUR.Wcisniety(mousePosition, mouseReleased) or DWUA.Wcisniety(mousePosition, mouseReleased)) && !working)
 		{
 			automat = !automat;
-			std::cout << "Zmiana trybu" << std::endl;
 		}
-		if (automat == false)
+		if (!automat)
 		{
-			if ((IsKeyDown(KEY_LEFT) || Xplus.Wcisniety(mousePosition, mousePressed)) && yC < yMax)
+			if ((IsKeyDown(KEY_LEFT) || Xplus.Wcisniety(mousePosition, mousePressed)) && yC < yCM)
 			{
 				yC += 1;
 				yT += 1;
@@ -325,7 +336,7 @@ int main() {
 				yS += 1;
 				//std::cout << yC << '\n';
 			}
-			if ((IsKeyDown(KEY_RIGHT) || Xmin.Wcisniety(mousePosition, mousePressed)) && yC > yMin)
+			if ((IsKeyDown(KEY_RIGHT) || Xmin.Wcisniety(mousePosition, mousePressed)) && yC > yCm)
 			{
 				yC -= 1;
 				yT -= 1;
@@ -354,6 +365,54 @@ int main() {
 				rotationMA -= 2.0f;
 				//std::cout << "Obrót MA-: " << rotationTR << " stopni\n";
 			}
+		}
+		else if (!working) {
+			if (IsFileDropped()) {
+				droppedFiles = LoadDroppedFiles();
+				if (droppedFiles.count > 1 || droppedFiles.count == 0) {
+					UnloadDroppedFiles(droppedFiles);
+				}
+				else {
+					std::filesystem::path plik = std::string(droppedFiles.paths[0]);
+
+					if (!std::filesystem::exists(plik) || plik.extension() != ".gcode") {
+						//kill yourself
+					}
+					else {
+						gcode.open(plik);
+						working = true;
+					}
+				}
+			}
+		}
+		if (working) {
+			/*std::string buffer;
+			for (int i = 0; i < index; i++) {
+				std::getline(gcode, buffer);
+				buffer.clear();
+			}*/
+			std::getline(gcode, linia);
+			if (linia.find(';') == std::string::npos)
+			{
+				std::stringstream ss(linia);
+				char separator = ' ';
+				std::string token;
+				while (ss >> token) {
+					if (token[0] == 'X') {
+						yC = normalize(yCm, std::stod(token.substr(1)), yCM);
+						yM = normalize(yMm, std::stod(token.substr(1)), yMM);
+						yT = normalize(yTm, std::stod(token.substr(1)), yTM);
+						yS = normalize(ySm, std::stod(token.substr(1)), ySM);
+					}
+					else if (token[0] == 'Y') {
+						rotationMA = std::stod(token.substr(1));
+					}
+					else if (token[0] == 'Z') {
+						rotationTR = std::stod(token.substr(1));
+					}
+				}
+			}
+			if (gcode.eof()) { gcode.close(); UnloadDroppedFiles(droppedFiles); automat = !automat; working = false; }
 		}
 
 		//Ruch kamery bo mnie już wkurzało że latała cały czas
@@ -387,7 +446,7 @@ int main() {
 			if (!part.isMovable())
 				part.Draw();
 			else
-			{   
+			{
 				if (part.getName() == "Motor Gear.obj") {
 					pos.z = yM;
 					part.setPosition(pos);
