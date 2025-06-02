@@ -211,6 +211,7 @@ int main() {
 	//std::cout << "Working directory: " << std::filesystem::current_path() << "\n";
 	bool automat = false;
 	float rotationTR = 0.0;
+	float rotationMA = 0.0;
 
 	InitWindow(1000, 800, "Wizualizacja nawijarki");
 	SetTargetFPS(60);
@@ -356,6 +357,17 @@ int main() {
 				rotationTR -= 2.0f;
 				std::cout << "Obrót TR-: " << rotationTR << " stopni\n";
 			}
+			if (MAplus.Wcisniety(mousePosition, mousePressed))
+			{
+				rotationMA += 2.0f;
+				std::cout << "Obrót MA+: " << rotationTR << " stopni\n";
+			}
+
+			if (MAmin.Wcisniety(mousePosition, mousePressed))
+			{
+				rotationMA -= 2.0f;
+				std::cout << "Obrót MA-: " << rotationTR << " stopni\n";
+			}
 		}
 		
 
@@ -421,7 +433,8 @@ int main() {
 					part.Draw(pos, { rotation, 0, 0 });
 				}
 				else if(part.getName() == "Mandrel.obj") {
-					part.Draw(pos);
+					part.setPosition(pos);
+					part.Draw2(pos, { 0, 0, rotationMA });
 				}
 			}
 		}
