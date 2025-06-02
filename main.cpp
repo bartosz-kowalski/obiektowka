@@ -60,23 +60,10 @@ public:
 	}
 
 	void Draw() {
-		//if(!movable)
 		DrawModelEx(model, position, rotationAxis, rotationAngle, scale, WHITE);
 	}
 
 	void Draw(Vector3 pos, Vector3 rot) {
-		rot.x = DEG2RAD * rot.x;
-		rot.y = DEG2RAD * rot.y;
-		rot.z = DEG2RAD * rot.z;
-
-		Matrix obrot = MatrixRotateXYZ(rot);
-		Matrix posuw = MatrixTranslate(pos.x, pos.y, pos.z);
-
-		model.transform = MatrixMultiply(posuw, obrot);
-
-		DrawModel(model, Vector3Zero(), 0.01f, WHITE);
-	}
-	void Draw2(Vector3 pos, Vector3 rot) {
 		rot.x = DEG2RAD * rot.x;
 		rot.y = DEG2RAD * rot.y;
 		rot.z = DEG2RAD * rot.z;
@@ -96,7 +83,7 @@ public:
 		DrawModel(model, Vector3Zero(), 0.01f, WHITE);
 	}
 
-	Vector3 getPosition() const{
+	Vector3 getPosition() const {
 		return position;
 	}
 
@@ -267,7 +254,6 @@ int main() {
 			}
 			else {
 				czesc part(loadedModel, pos, fileName, move, { 0, 1, 0 }, 90.0f);
-				//part.setRotationAxis({ 1, 0, 0 });
 				czesci.push_back(part);
 			}
 		}
@@ -293,21 +279,21 @@ int main() {
 		part.getModel().materials[0].shader = shader;
 		if (part.getName() == "Carrage.obj") {
 			yMin = yC = part.getPosition().z;
-			std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
+			//std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
 		}
 		if (part.getName() == "Motor Gear.obj") {
-			yM = part.getPosition().x;
-			std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
+			yM = part.getPosition().z;
+			//std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
 		}
 
 		if (part.getName() == "Tool roller.obj") {
 			yT = part.getPosition().z;
-			std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
+			//std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
 		}
 
 		if (part.getName() == "Spool hookers.obj") {
 			yS = part.getPosition().z;
-			std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
+			//std::cout << part.getPosition().x << ' ' << part.getPosition().y << ' ' << part.getPosition().z << '\n';
 		}
 
 	}
@@ -331,47 +317,44 @@ int main() {
 		}
 		if (automat == false)
 		{
-		if (Xplus.Wcisniety(mousePosition, mousePressed) && yC < yMax)
+			if ((IsKeyDown(KEY_LEFT) || Xplus.Wcisniety(mousePosition, mousePressed)) && yC < yMax)
 			{
 				yC += 1;
 				yT += 1;
-				yM -= 1;
+				yM += 1;
 				yS += 1;
-				std::cout << yC << '\n';
+				//std::cout << yC << '\n';
 			}
-			if (Xmin.Wcisniety(mousePosition, mousePressed) && yC > yMin)
+			if ((IsKeyDown(KEY_RIGHT) || Xmin.Wcisniety(mousePosition, mousePressed)) && yC > yMin)
 			{
 				yC -= 1;
 				yT -= 1;
-				yM += 1;
+				yM -= 1;
 				yS -= 1;
 			}
-			if (TRplus.Wcisniety(mousePosition, mousePressed))
+			if (IsKeyDown(KEY_W) || TRplus.Wcisniety(mousePosition, mousePressed))
 			{
 				rotationTR += 2.0f;
-				std::cout << "Obrót TR+: " << rotationTR << " stopni\n";
+				//std::cout << "Obrót TR+: " << rotationTR << " stopni\n";
 			}
 
-			if (TRmin.Wcisniety(mousePosition, mousePressed))
+			if (IsKeyDown(KEY_S) || TRmin.Wcisniety(mousePosition, mousePressed))
 			{
 				rotationTR -= 2.0f;
-				std::cout << "Obrót TR-: " << rotationTR << " stopni\n";
+				//std::cout << "Obrót TR-: " << rotationTR << " stopni\n";
 			}
-			if (MAplus.Wcisniety(mousePosition, mousePressed))
+			if (IsKeyDown(KEY_A) || MAplus.Wcisniety(mousePosition, mousePressed))
 			{
 				rotationMA += 2.0f;
-				std::cout << "Obrót MA+: " << rotationTR << " stopni\n";
+				//std::cout << "Obrót MA+: " << rotationTR << " stopni\n";
 			}
 
-			if (MAmin.Wcisniety(mousePosition, mousePressed))
+			if (IsKeyDown(KEY_D) || MAmin.Wcisniety(mousePosition, mousePressed))
 			{
 				rotationMA -= 2.0f;
-				std::cout << "Obrót MA-: " << rotationTR << " stopni\n";
+				//std::cout << "Obrót MA-: " << rotationTR << " stopni\n";
 			}
 		}
-		
-
-		//UpdateCamera(&camera, CAMERA_THIRD_PERSON);
 
 		//Ruch kamery bo mnie już wkurzało że latała cały czas
 		if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
@@ -397,30 +380,25 @@ int main() {
 
 
 		float rotation = 0;
-		int gearMod = 5;
+		int gearMod = 2;
 
 		for (czesc& part : czesci) {
 			Vector3 pos = part.getPosition();
 			if (!part.isMovable())
 				part.Draw();
 			else
-			{   //carrage, motor gear, tool roller
+			{   
 				if (part.getName() == "Motor Gear.obj") {
-					pos.x = yM;
+					pos.z = yM;
 					part.setPosition(pos);
-					part.Draw(pos, { rotation * gearMod, 90.0f, 0 });
+					part.Draw(pos, { -rotationTR * gearMod, 90.0f, 0 });
 
 				}
 				else if (part.getName() == "Tool roller.obj") {
-					//rlPushMatrix();
-					//rlTranslatef(pos.x,pos.y,pos.z);
-					//rlRotatef(rotationTR, pos.x, pos.y, pos.z);
-					//rlTranslatef(-pos.x, -pos.y, -pos.z);
+
 					pos.z = yT;
 					part.setPosition(pos);
-					part.Draw2(pos, { rotationTR, 0, 0 });
-					//DrawModelEx(part.getModel(), {0,0,0}, {1, 0, 0}, rotationTR, {0.01,0.01,0.01}, WHITE);
-					//rlPopMatrix();
+					part.Draw(pos, { rotationTR, 0, 0 });
 				}
 				else if (part.getName() == "Carrage.obj") {
 					pos.z = yC;
@@ -430,11 +408,11 @@ int main() {
 				else if (part.getName() == "Spool hookers.obj") {
 					pos.z = yS;
 					part.setPosition(pos);
-					part.Draw(pos, { rotation, 0, 0 });
+					part.Draw(pos, { 0, 0, rotationMA * 0.9270072f });
 				}
-				else if(part.getName() == "Mandrel.obj") {
+				else if (part.getName() == "Mandrel.obj") {
 					part.setPosition(pos);
-					part.Draw2(pos, { 0, 0, rotationMA });
+					part.Draw(pos, { 0, 0, rotationMA });
 				}
 			}
 		}
@@ -450,13 +428,13 @@ int main() {
 		MAplus.Draw();
 		if (automat == false)
 		{
-		DWUR.Draw();
+			DWUR.Draw();
 		}
 		else
 		{
-		DWUA.Draw();
+			DWUA.Draw();
 		}
-		
+
 
 		EndDrawing();
 	}
