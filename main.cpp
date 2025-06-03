@@ -433,7 +433,6 @@ int main() {
 			if ((Estop.Wcisniety(mousePosition, mousePressed)))
 			{
 				stop = true;
-				std::cout << "AAAAAAAAAAAAAAA" << std::endl;
 			}
 			if (stop)
 			{
