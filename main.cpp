@@ -303,6 +303,8 @@ int main() {
 		}
 
 	}
+	double gC, gM, gS, gT, gMA, gTR;
+	double kC = 0, kM = 0, kS = 0, kT = 0, kMA = 0, kTR = 0;
 
 	yCM = 800;
 	yMM = ySM = 400;
@@ -380,40 +382,56 @@ int main() {
 						//kill yourself??????????
 					}
 					else {
+						iterator = 0;
 						gcode.open(plik);
 						working = true;
 					}
 				}
 			}
 		}
-		if (working && iterator % 10 == 0) {
-			/*std::string buffer;
-			for (int i = 0; i < index; i++) {
-				std::getline(gcode, buffer);
-				buffer.clear();
-			}*/
+		if (working && iterator % 11 == 0) {
+
 			std::getline(gcode, linia);
 			if (linia.find(';') == std::string::npos)
 			{
+				kC = kM = kS = kT = 0;
 				std::stringstream ss(linia);
 				char separator = ' ';
 				std::string token;
 				while (ss >> token) {
 					if (token[0] == 'X') {
-						yC = normalize(yCm, std::stod(token.substr(1)), yCM);
-						yM = normalize(yMm, std::stod(token.substr(1)), yMM);
-						yT = normalize(yTm, std::stod(token.substr(1)), yTM);
-						yS = normalize(ySm, std::stod(token.substr(1)), ySM);
+						gC = normalize(yCm, std::stod(token.substr(1)), yCM);
+						gM = normalize(yMm, std::stod(token.substr(1)), yMM);
+						gT = normalize(yTm, std::stod(token.substr(1)), yTM);
+						gS = normalize(ySm, std::stod(token.substr(1)), ySM);
+
+						kC = (gC - yC) / 10;
+						kM = (gM - yM) / 10;
+						kS = (gS - yS) / 10;
+						kT = (gT - yT) / 10;
 					}
 					else if (token[0] == 'Y') {
-						rotationMA = std::stod(token.substr(1));
+						gMA = std::stod(token.substr(1));
+						kMA = (gMA - rotationMA) / 10;
 					}
 					else if (token[0] == 'Z') {
-						rotationTR = std::stod(token.substr(1));
+						gTR = std::stod(token.substr(1));
+						kTR = (gTR - rotationTR) / 10;
 					}
 				}
 			}
 			if (gcode.eof()) { gcode.close(); UnloadDroppedFiles(droppedFiles); automat = !automat; working = false; iterator = 0; }
+		}
+
+		if (working)
+		{
+			yC += kC;
+			yM += kM;
+			yS += kS;
+			yT += kT;
+			rotationMA += kMA;
+			rotationTR += kTR;
+			iterator += 1;
 		}
 
 		//Ruch kamery bo mnie już wkurzało że latała cały czas
