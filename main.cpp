@@ -203,6 +203,7 @@ float normalize(float min, float value, float max) {
 int main() {
 	//std::cout << "Working directory: " << std::filesystem::current_path() << "\n";
 	bool automat = false;
+	bool stop = false;
 	float rotationTR = 0.0;
 	float rotationMA = 0.0;
 
@@ -217,6 +218,7 @@ int main() {
 	Guzik MAmin{ "Menu/MAmin.png", {432, 32} };
 	Guzik DWUR{ "Menu/DwuR.png", {730, 32} };
 	Guzik DWUA{ "Menu/DwuA.png", {730, 32} };
+	Guzik Estop{ "Menu/Estop.png", {804, 32} };
 
 	Camera3D camera = { 0 };
 	camera.position = { 1.0f, 10.0f, 0.0f };  // Camera position
@@ -392,6 +394,20 @@ int main() {
 		if (working && iterator % 11 == 0) {
 
 			std::getline(gcode, linia);
+			if ((Estop.Wcisniety(mousePosition, mousePressed)))
+			{
+				stop = true;
+			}
+			if (stop)
+			{
+				gcode.close();
+				UnloadDroppedFiles(droppedFiles);
+				automat = !automat;
+				working = false;
+				iterator = 0;
+				stop = false;
+				continue;
+			}
 			if (linia.find(';') == std::string::npos)
 			{
 				kC = kM = kS = kT = 0;
@@ -399,6 +415,7 @@ int main() {
 				char separator = ' ';
 				std::string token;
 				while (ss >> token) {
+					
 					if (token[0] == 'X') {
 						gC = normalize(yCm, std::stod(token.substr(1)), yCM);
 						gM = normalize(yMm, std::stod(token.substr(1)), yMM);
@@ -504,6 +521,7 @@ int main() {
 		TRmin.Draw();
 		MAmin.Draw();
 		MAplus.Draw();
+		Estop.Draw();
 		if (automat == false)
 		{
 			DWUR.Draw();
