@@ -131,7 +131,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="czesci.cpp" />
+    <ClCompile Include="guzik.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="rozne.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="czesci.hpp" />
+    <ClInclude Include="guzik.hpp" />
+    <ClInclude Include="rozne.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
