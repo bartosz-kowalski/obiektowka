@@ -393,21 +393,9 @@ int main() {
 		}
 		if (working && iterator % 11 == 0) {
 
+			
+			
 			std::getline(gcode, linia);
-			if ((Estop.Wcisniety(mousePosition, mousePressed)))
-			{
-				stop = true;
-			}
-			if (stop)
-			{
-				gcode.close();
-				UnloadDroppedFiles(droppedFiles);
-				automat = !automat;
-				working = false;
-				iterator = 0;
-				stop = false;
-				continue;
-			}
 			if (linia.find(';') == std::string::npos)
 			{
 				kC = kM = kS = kT = 0;
@@ -442,6 +430,21 @@ int main() {
 
 		if (working)
 		{
+			if ((Estop.Wcisniety(mousePosition, mousePressed)))
+			{
+				stop = true;
+				std::cout << "AAAAAAAAAAAAAAA" << std::endl;
+			}
+			if (stop)
+			{
+				gcode.close();
+				UnloadDroppedFiles(droppedFiles);
+				automat = !automat;
+				working = false;
+				iterator = 0;
+				stop = false;
+				continue;
+			}
 			yC += kC;
 			yM += kM;
 			yS += kS;
