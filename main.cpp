@@ -377,7 +377,7 @@ int main() {
 					std::filesystem::path plik = std::string(droppedFiles.paths[0]);
 
 					if (!std::filesystem::exists(plik) || plik.extension() != ".gcode") {
-						//kill yourself
+						//kill yourself??????????
 					}
 					else {
 						gcode.open(plik);
