@@ -42,7 +42,7 @@ bool CheckCollisionRayTriangle(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, Vect
 int main() {
 
 	InitWindow(1000, 800, "Wizualizacja nawijarki");
-	SetTargetFPS(60);
+	SetTargetFPS(600);
 	bool automat = false;
 	bool stop = false;
 	float rotationTR = 0.0;
@@ -66,6 +66,8 @@ int main() {
 	Vector4 objectColor = { 0.5f, 0.5f, 0.5f, 1.0f };
 	Vector3 tool_pos = { 0 };
 	Vector3 draw_pos = { 261, 0, 183 };
+	Vector3 pozycjagluta = {0,0,0};
+	std::vector<Vector3>pozycjeglutow;
 
 	FilePathList droppedFiles;
 
@@ -325,6 +327,23 @@ int main() {
 					part.Draw(pos, { rotationTR, 0, 0 });
 					filament_r.position = pos;
 					filament_r.direction = { 1, 0, 0 };
+					float WielkoscGluta = 38;
+					float ObwodGlutax = WielkoscGluta * cos(rotationMA);
+					float ObwodGlutay = WielkoscGluta * sin(rotationMA);
+					pozycjagluta = { 0.01f * (pos.x+274 + ObwodGlutax),0.01f * (pos.y + 3 + ObwodGlutay),0.01f * pos.z};
+					for (Vector3 glut : pozycjeglutow)
+					{
+						DrawSphere(glut, 0.02, BLUE);
+					}
+					//float czas = GetTime();
+					//czas = round((czas * 10));
+					//czas = static_cast<int>(czas) % 10;
+					//std::cout << czas << std::endl;
+					if (true)
+					{
+					pozycjeglutow.push_back(pozycjagluta);
+					}
+					//std::cout << pos.x << std::endl << pos.y << std::endl << pos.z << std::endl;
 				}
 				else if (part.getName() == "Carrage.obj") {
 					pos.z = yC;
@@ -338,13 +357,16 @@ int main() {
 				}
 				else if (part.getName() == "Mandrel.obj") {
 					part.setPosition(pos);
+					//std::cout << pos.x << std::endl << pos.y << std::endl << pos.z << std::endl;
 					part.Draw(pos, { 0, 0, rotationMA });
+
+					
 				}
 			}
 		}
-
+		//Vector3 draw_pos = { 275*0.01, (40+183)*0.01,  - 90 * 0.01};
+		//DrawSphere(draw_pos, 0.02, BLUE);
 		//279 y z 
-		DrawSphere(draw_pos, 1, BLUE);
 
 		DrawGrid(10, 1.0f);
 		EndMode3D();
