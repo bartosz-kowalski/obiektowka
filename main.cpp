@@ -175,6 +175,7 @@ int main() {
 				yM += 1;
 				yS += 1;
 				rotationSH += 2;
+				std::cout << "yC: " << yC << std::endl;
 			}
 			if ((IsKeyDown(KEY_RIGHT) || Xmin.Wcisniety(mousePosition, mousePressed)) && yC > yCm)
 			{
@@ -183,6 +184,7 @@ int main() {
 				yM -= 1;
 				yS -= 1;
 				rotationSH += 2;
+				std::cout << "yC: " << yC << std::endl;
 			}
 			if (IsKeyDown(KEY_W) || TRplus.Wcisniety(mousePosition, mousePressed))
 			{
@@ -328,6 +330,7 @@ int main() {
 				}
 				else if (part.getName() == "Carrage.obj") {
 					pos.z = yC;
+					std::cout << "yC: " << yC << std::endl;
 					part.setPosition(pos);
 					part.Draw(pos);
 				}
