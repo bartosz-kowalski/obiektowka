@@ -64,6 +64,8 @@ int main() {
 	Vector3 lightPos = { 0.0f, 4.0f, 0.0f };
 	Vector4 lightColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	Vector4 objectColor = { 0.5f, 0.5f, 0.5f, 1.0f };
+	Vector3 tool_pos = { 0 };
+	Vector3 draw_pos = { 261, 0, 183 };
 
 	FilePathList droppedFiles;
 
@@ -229,7 +231,7 @@ int main() {
 				}
 			}
 		}
-		if (working && iterator % 11 == 0) {
+		if (working && iterator % 6 == 0) {
 
 			if (gcode.eof()) { gcode.close(); UnloadDroppedFiles(droppedFiles); automat = !automat; working = false; iterator = 0; continue; }
 			std::getline(gcode, linia);
@@ -242,16 +244,16 @@ int main() {
 				while (ss >> token) {
 
 					if (token[0] == 'X') {
-						kC = (normalize(yCm, std::stod(token.substr(1)), yCM) - yC) / 10;
-						kM = (normalize(yMm, std::stod(token.substr(1)), yMM) - yM) / 10;
-						kT = (normalize(yTm, std::stod(token.substr(1)), yTM) - yT) / 10;
-						kS = (normalize(ySm, std::stod(token.substr(1)), ySM) - yS) / 10;
+						kC = (normalize(yCm, std::stod(token.substr(1)), yCM) - yC) / 5;
+						kM = (normalize(yMm, std::stod(token.substr(1)), yMM) - yM) / 5;
+						kT = (normalize(yTm, std::stod(token.substr(1)), yTM) - yT) / 5;
+						kS = (normalize(ySm, std::stod(token.substr(1)), ySM) - yS) / 5;
 					}
 					else if (token[0] == 'Y') {
-						kMA = (std::stod(token.substr(1)) - rotationMA) / 10;
+						kMA = (std::stod(token.substr(1)) - rotationMA) / 5;
 					}
 					else if (token[0] == 'Z') {
-						kTR = (std::stod(token.substr(1)) - rotationTR) / 10;
+						kTR = (std::stod(token.substr(1)) - rotationTR) / 5;
 					}
 				}
 			}
@@ -304,8 +306,6 @@ int main() {
 		ClearBackground(RAYWHITE);
 
 		BeginMode3D(camera);
-		Mesh mesh;
-		Matrix transform;
 		for (czesc& part : czesci) {
 			Vector3 pos = part.getPosition();
 			if (!part.isMovable())
@@ -319,9 +319,9 @@ int main() {
 
 				}
 				else if (part.getName() == "Tool roller.obj") {
-
-					pos.z = yT;
+					draw_pos.z = pos.z = yT;
 					part.setPosition(pos);
+					tool_pos = pos;
 					part.Draw(pos, { rotationTR, 0, 0 });
 					filament_r.position = pos;
 					filament_r.direction = { 1, 0, 0 };
@@ -339,40 +339,12 @@ int main() {
 				else if (part.getName() == "Mandrel.obj") {
 					part.setPosition(pos);
 					part.Draw(pos, { 0, 0, rotationMA });
-					mesh = part.getModel().meshes[0];
-					transform = part.getModel().transform;
 				}
 			}
 		}
 
-		/*for (int i = 0; i < mesh.triangleCount; i++) {
-			int i0 = mesh.indices[i * 3 + 0];
-			int i1 = mesh.indices[i * 3 + 1];
-			int i2 = mesh.indices[i * 3 + 2];
-
-			Vector3 v0 = Vector3Transform(
-				{
-				mesh.vertices[i0 * 3 + 0], mesh.vertices[i0 * 3 + 1], mesh.vertices[i0 * 3 + 2]
-				},
-				transform);
-			Vector3 v1 = Vector3Transform(
-				{
-				mesh.vertices[i1 * 3 + 0], mesh.vertices[i1 * 3 + 1], mesh.vertices[i1 * 3 + 2]
-				},
-				transform);
-			Vector3 v2 = Vector3Transform(
-				{
-				mesh.vertices[i2 * 3 + 0], mesh.vertices[i2 * 3 + 1], mesh.vertices[i2 * 3 + 2]
-				},
-				transform);
-
-			Vector3 hitPos = { 0 };
-			if (CheckCollisionRayTriangle(filament_r, v0, v1, v2, &hitPos)) {
-				std::cout << hitPos.x << ' ' << hitPos.y << ' ' << hitPos.z << std::endl;
-				break;
-			}
-		}*/
-		//break;
+		//279 y z 
+		DrawSphere(draw_pos, 1, BLUE);
 
 		DrawGrid(10, 1.0f);
 		EndMode3D();
