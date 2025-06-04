@@ -2,43 +2,6 @@
 #include "czesci.hpp"
 #include "rozne.hpp"
 
-#define MAX_SEGMENTS 10000
-Vector3 path[MAX_SEGMENTS];
-int pathCount = 0;
-Mesh filamentMesh = { 0 };
-Model filamentModel = { 0 };
-bool filamentDirty = true;
-float filamentWidth = 0.05f;
-
-bool CheckCollisionRayTriangle(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, Vector3* out)
-{
-
-	Vector3 edge1 = Vector3Subtract(p2, p1);
-	Vector3 edge2 = Vector3Subtract(p3, p1);
-	Vector3 h = Vector3CrossProduct(ray.direction, edge2);
-	float a = Vector3DotProduct(edge1, h);
-	if (a > -EPSILON && a < EPSILON) return false;
-
-	float f = 1.0f / a;
-	Vector3 s = Vector3Subtract(ray.position, p1);
-	float u = f * Vector3DotProduct(s, h);
-	if (u < 0.0f || u > 1.0f) return false;
-
-	Vector3 q = Vector3CrossProduct(s, edge1);
-	float v = f * Vector3DotProduct(ray.direction, q);
-	if (v < 0.0f || u + v > 1.0f) return false;
-
-	float t = f * Vector3DotProduct(edge2, q);
-	if (t > EPSILON) {
-		if (out != NULL) {
-			*out = Vector3Add(ray.position, Vector3Scale(ray.direction, t));
-		}
-		return true;
-	}
-
-	return false;
-}
-
 int main() {
 
 	InitWindow(1000, 800, "Wizualizacja nawijarki");
@@ -52,6 +15,9 @@ int main() {
 	bool working = false;
 	int iterator = 0, rotationSH = 0;
 	float wheel;
+	float WielkoscGluta = 38;
+	float ObwodGlutax = 0;
+	float ObwodGlutay = 0;
 	int gearMod = 2;
 	std::ifstream gcode;
 	std::string linia;
@@ -66,7 +32,7 @@ int main() {
 	Vector4 objectColor = { 0.5f, 0.5f, 0.5f, 1.0f };
 	Vector3 tool_pos = { 0 };
 	Vector3 draw_pos = { 261, 0, 183 };
-	Vector3 pozycjagluta = {0,0,0};
+	Vector3 pozycjagluta = { 0,0,0 };
 	std::vector<Vector3>pozycjeglutow;
 
 	FilePathList droppedFiles;
@@ -272,6 +238,7 @@ int main() {
 				rotationMA = static_cast<int>(rotationMA) % 360;
 				rotationTR = static_cast<int>(rotationTR) % 360;
 				gcode.close();
+				kC = kM = kS = kT = kMA = kTR = 0;
 				UnloadDroppedFiles(droppedFiles);
 				automat = !automat;
 				working = false;
@@ -321,29 +288,35 @@ int main() {
 
 				}
 				else if (part.getName() == "Tool roller.obj") {
-					draw_pos.z = pos.z = yT;
+					pos.z = yT;
 					part.setPosition(pos);
 					tool_pos = pos;
 					part.Draw(pos, { rotationTR, 0, 0 });
-					filament_r.position = pos;
-					filament_r.direction = { 1, 0, 0 };
-					float WielkoscGluta = 38;
-					float ObwodGlutax = WielkoscGluta * cos(rotationMA);
-					float ObwodGlutay = WielkoscGluta * sin(rotationMA);
-					pozycjagluta = { 0.01f * (pos.x+274 + ObwodGlutax),0.01f * (pos.y + 3 + ObwodGlutay),0.01f * pos.z};
-					for (Vector3 glut : pozycjeglutow)
-					{
-						DrawSphere(glut, 0.02, BLUE);
-					}
+
+					ObwodGlutax = WielkoscGluta * cos(rotationMA);
+					ObwodGlutay = WielkoscGluta * sin(rotationMA);
+					pozycjagluta = { 0.01f * (pos.x + 274 + ObwodGlutax),0.01f * (pos.y + 3 + ObwodGlutay),0.01f * pos.z };
+					Vector3 translated = Vector3Subtract(pozycjagluta, { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z });
+					Vector3 axis = Vector3Normalize({ 0,0,1 });
+					Vector3 rotated = Vector3RotateByAxisAngle(translated, axis, kMA);
+					pozycjagluta = Vector3Add(rotated, { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z });
+
 					//float czas = GetTime();
 					//czas = round((czas * 10));
 					//czas = static_cast<int>(czas) % 10;
 					//std::cout << czas << std::endl;
 					if (true)
 					{
-					pozycjeglutow.push_back(pozycjagluta);
+						pozycjeglutow.push_back(pozycjagluta);
+						for (auto& glut : pozycjeglutow)
+						{
+							DrawSphere(glut, 0.02, BLUE);
+							//Vector3 translated = Vector3Subtract(glut, { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z });
+							//Vector3 axis = Vector3Normalize({ 0,0,1 });
+							//Vector3 rotated = Vector3RotateByAxisAngle(translated, axis, kMA);
+							//glut = Vector3Add(rotated, { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z });
+						}
 					}
-					//std::cout << pos.x << std::endl << pos.y << std::endl << pos.z << std::endl;
 				}
 				else if (part.getName() == "Carrage.obj") {
 					pos.z = yC;
@@ -360,7 +333,7 @@ int main() {
 					//std::cout << pos.x << std::endl << pos.y << std::endl << pos.z << std::endl;
 					part.Draw(pos, { 0, 0, rotationMA });
 
-					
+
 				}
 			}
 		}
