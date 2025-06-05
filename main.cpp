@@ -30,10 +30,10 @@ int main() {
 	Vector3 lightPos = { 0.0f, 4.0f, 0.0f };
 	Vector4 lightColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	Vector4 objectColor = { 0.5f, 0.5f, 0.5f, 1.0f };
-	Vector3 tool_pos = { 0 };
-	Vector3 draw_pos = { 261, 0, 183 };
 	Vector3 pozycjagluta = { 0,0,0 };
-	std::vector<Vector3>pozycjeglutow;
+	std::vector<Vector3>pozycjeGlutow;
+	std::vector<float>rotacjeGlutow;
+	float rotacjaGluta = 0;
 
 	FilePathList droppedFiles;
 
@@ -145,7 +145,7 @@ int main() {
 				yM += 1;
 				yS += 1;
 				rotationSH += 2;
-				std::cout << "yC: " << yC << std::endl;
+
 			}
 			if ((IsKeyDown(KEY_RIGHT) || Xmin.Wcisniety(mousePosition, mousePressed)) && yC > yCm)
 			{
@@ -154,7 +154,6 @@ int main() {
 				yM -= 1;
 				yS -= 1;
 				rotationSH += 2;
-				std::cout << "yC: " << yC << std::endl;
 			}
 			if (IsKeyDown(KEY_W) || TRplus.Wcisniety(mousePosition, mousePressed))
 			{
@@ -186,6 +185,8 @@ int main() {
 					UnloadDroppedFiles(droppedFiles);
 				}
 				else {
+					pozycjeGlutow.clear();
+					rotacjeGlutow.clear();
 					std::filesystem::path plik = std::string(droppedFiles.paths[0]);
 
 					if (!std::filesystem::exists(plik) || plik.extension() != ".gcode") {
@@ -203,7 +204,16 @@ int main() {
 		}
 		if (working && iterator % 6 == 0) {
 
-			if (gcode.eof()) { gcode.close(); UnloadDroppedFiles(droppedFiles); automat = !automat; working = false; iterator = 0; continue; }
+			if (gcode.eof()) {
+				gcode.close();
+				UnloadDroppedFiles(droppedFiles);
+				automat = !automat;
+				working = false;
+				iterator = 0;
+				pozycjeGlutow.clear();
+				rotacjeGlutow.clear();
+				continue;
+			}
 			std::getline(gcode, linia);
 			if (linia.find(';') == std::string::npos)
 			{
@@ -212,8 +222,13 @@ int main() {
 				char separator = ' ';
 				std::string token;
 				while (ss >> token) {
+					if (token[0] == 'G') {
 
-					if (token[0] == 'X') {
+					}
+					else if (token[0] == 'F') {
+
+					}
+					else if (token[0] == 'X') {
 						kC = (normalize(yCm, std::stod(token.substr(1)), yCM) - yC) / 5;
 						kM = (normalize(yMm, std::stod(token.substr(1)), yMM) - yM) / 5;
 						kT = (normalize(yTm, std::stod(token.substr(1)), yTM) - yT) / 5;
@@ -246,6 +261,8 @@ int main() {
 				working = false;
 				iterator = 0;
 				stop = false;
+				//pozycjeGlutow.clear();
+				//rotacjeGlutow.clear();
 				continue;
 			}
 			yC += kC;
@@ -292,37 +309,39 @@ int main() {
 				else if (part.getName() == "Tool roller.obj") {
 					pos.z = yT;
 					part.setPosition(pos);
-					tool_pos = pos;
 					part.Draw(pos, { rotationTR, 0, 0 });
 
 					ObwodGlutax = WielkoscGluta * cos(rotationMA);
 					ObwodGlutay = WielkoscGluta * sin(rotationMA);
 					pozycjagluta = { 0.01f * (pos.x + 274 + ObwodGlutax),0.01f * (pos.y + 3 + ObwodGlutay),0.01f * pos.z };
-					Vector3 translated = Vector3Subtract(pozycjagluta, { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z });
-					Vector3 axis = Vector3Normalize({ 0,0,1 });
-					Vector3 rotated = Vector3RotateByAxisAngle(translated, axis, kMA);
-					pozycjagluta = Vector3Add(rotated, { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z });
-
+					rotacjaGluta += kMA;
 					//float czas = GetTime();
 					//czas = round((czas * 10));
 					//czas = static_cast<int>(czas) % 10;
 					//std::cout << czas << std::endl;
 					if (true)
 					{
-						pozycjeglutow.push_back(pozycjagluta);
-						for (auto& glut : pozycjeglutow)
+						pozycjeGlutow.push_back(pozycjagluta);
+						for (auto& rot : rotacjeGlutow) {
+							rot += kMA;
+						}
+						rotacjeGlutow.push_back(rotacjaGluta);
+						for (int i = 0; i < pozycjeGlutow.size(); i++)
 						{
-							DrawSphere(glut, 0.02, BLUE);
-							//Vector3 translated = Vector3Subtract(glut, { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z });
-							//Vector3 axis = Vector3Normalize({ 0,0,1 });
-							//Vector3 rotated = Vector3RotateByAxisAngle(translated, axis, kMA);
-							//glut = Vector3Add(rotated, { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z });
+							rotacjeGlutow[i] = static_cast<int>(rotacjeGlutow[i]) % 360;
+							DrawSphere(pozycjeGlutow[i], 0.02, BLUE);
+							if (working) {
+								Vector3 translated = Vector3Subtract(pozycjeGlutow[i], { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z });
+								Vector3 axis = Vector3Normalize({ 0,0,1 });
+								Vector3 rotated = Vector3RotateByAxisAngle(translated, axis, rotacjeGlutow[i]);
+								pozycjeGlutow[i] = Vector3Add(rotated, { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z });
+							}
 						}
 					}
+
 				}
 				else if (part.getName() == "Carrage.obj") {
 					pos.z = yC;
-					std::cout << "yC: " << yC << std::endl;
 					part.setPosition(pos);
 					part.Draw(pos);
 				}
@@ -333,7 +352,6 @@ int main() {
 				}
 				else if (part.getName() == "Mandrel.obj") {
 					part.setPosition(pos);
-					//std::cout << pos.x << std::endl << pos.y << std::endl << pos.z << std::endl;
 					part.Draw(pos, { 0, 0, rotationMA });
 
 

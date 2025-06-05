@@ -79,7 +79,7 @@ void deleteModels(std::vector <czesc> czesci)
 
 float normalize(float min, float value, float max) {
 	float min_x = 0;
-	float max_x = 100;
+	float max_x = 1000;
 	if (max_x - min_x == 0) return min;
 	return min + ((value - min_x) / (max_x - min_x)) * (max - min);
 }
