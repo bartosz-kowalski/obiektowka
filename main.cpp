@@ -1,6 +1,7 @@
 #include "guzik.hpp"
 #include "czesci.hpp"
 #include "rozne.hpp"
+#include "punkty.hpp"
 
 int main() {
 
@@ -31,9 +32,8 @@ int main() {
 	Vector4 lightColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	Vector4 objectColor = { 0.5f, 0.5f, 0.5f, 1.0f };
 	Vector3 pozycjagluta = { 0,0,0 };
-	std::vector<Vector3>pozycjeGlutow;
-	std::vector<float>rotacjeGlutow;
-	float rotacjaGluta = 0;
+	std::vector<punkty>siatka;
+	float rotacja = 0;
 
 	FilePathList droppedFiles;
 
@@ -185,8 +185,7 @@ int main() {
 					UnloadDroppedFiles(droppedFiles);
 				}
 				else {
-					pozycjeGlutow.clear();
-					rotacjeGlutow.clear();
+					siatka.clear();
 					std::filesystem::path plik = std::string(droppedFiles.paths[0]);
 
 					if (!std::filesystem::exists(plik) || plik.extension() != ".gcode") {
@@ -210,8 +209,7 @@ int main() {
 				automat = !automat;
 				working = false;
 				iterator = 0;
-				pozycjeGlutow.clear();
-				rotacjeGlutow.clear();
+				siatka.clear();
 				continue;
 			}
 			std::getline(gcode, linia);
@@ -261,8 +259,6 @@ int main() {
 				working = false;
 				iterator = 0;
 				stop = false;
-				//pozycjeGlutow.clear();
-				//rotacjeGlutow.clear();
 				continue;
 			}
 			yC += kC;
@@ -313,29 +309,25 @@ int main() {
 
 					ObwodGlutax = WielkoscGluta * cos(rotationMA);
 					ObwodGlutay = WielkoscGluta * sin(rotationMA);
-					pozycjagluta = { 0.01f * (pos.x + 274 + ObwodGlutax),0.01f * (pos.y + 3 + ObwodGlutay),0.01f * pos.z };
-					rotacjaGluta += kMA;
-					//float czas = GetTime();
-					//czas = round((czas * 10));
-					//czas = static_cast<int>(czas) % 10;
-					//std::cout << czas << std::endl;
-					if (true)
+					punkty punkt;
+					punkt.setPos({ 0.01f * (pos.x + 274 + ObwodGlutax),0.01f * (pos.y + 3 + ObwodGlutay),0.01f * pos.z });
+					rotacja += kMA;
+
+					for (auto point : siatka) {
+						point.changeRot(kMA);
+						point.setRot(static_cast<int>(point.getRot()) % 360);
+					}
+					punkt.changeRot(rotacja);
+					siatka.push_back(punkt);
+
+					for (int i = 0; i < siatka.size(); i++)
 					{
-						pozycjeGlutow.push_back(pozycjagluta);
-						for (auto& rot : rotacjeGlutow) {
-							rot += kMA;
-						}
-						rotacjeGlutow.push_back(rotacjaGluta);
-						for (int i = 0; i < pozycjeGlutow.size(); i++)
-						{
-							rotacjeGlutow[i] = static_cast<int>(rotacjeGlutow[i]) % 360;
-							DrawSphere(pozycjeGlutow[i], 0.02, BLUE);
-							if (working) {
-								Vector3 translated = Vector3Subtract(pozycjeGlutow[i], { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z });
-								Vector3 axis = Vector3Normalize({ 0,0,1 });
-								Vector3 rotated = Vector3RotateByAxisAngle(translated, axis, rotacjeGlutow[i]);
-								pozycjeGlutow[i] = Vector3Add(rotated, { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z });
-							}
+						DrawSphere(siatka[i].getPos(), 0.02, BLUE);
+						if (working) {
+							Vector3 translated = Vector3Subtract(siatka[i].getPos(), { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z });
+							Vector3 axis = Vector3Normalize({ 0,0,1 });
+							Vector3 rotated = Vector3RotateByAxisAngle(translated, axis, siatka[i].getRot());
+							siatka[i].setPos(Vector3Add(rotated, { 0.01f * (pos.x + 274), 0.01f * (pos.y + 3), 0.01f * pos.z }));
 						}
 					}
 
