@@ -7,35 +7,33 @@ int main() {
 
 	InitWindow(1000, 800, "Wizualizacja nawijarki");
 	SetTargetFPS(600);
+
 	bool automat = false;
 	bool stop = false;
+	bool working = false;
+
 	float rotationTR = 0.0;
 	float rotationMA = 0.0;
-	double kC = 0, kM = 0, kS = 0, kT = 0, kMA = 0, kTR = 0;
-	double yC, yM, yT, yS, yCm, yMm, yTm, ySm, yCM = 800, yMM = 400, yTM = 401, ySM = 400;
-	bool working = false;
-	int iterator = 0, rotationSH = 0;
 	float wheel;
 	float WielkoscGluta = 38;
 	float ObwodGlutax = 0;
 	float ObwodGlutay = 0;
-	int gearMod = 2;
-	std::ifstream gcode;
-	std::string linia;
+	float rotacja = 0;
+
+	double kC = 0, kM = 0, kS = 0, kT = 0, kMA = 0, kTR = 0;
+	double yC, yM, yT, yS, yCm, yMm, yTm, ySm, yCM = 800, yMM = 400, yTM = 401, ySM = 400;
+
+	int iterator = 0, rotationSH = 0, gearMod = 2;
 
 	Shader shader = LoadShader("lighting.vs", "lighting.fs");
 	int lightPosLoc = GetShaderLocation(shader, "lightPos");
 	int viewPosLoc = GetShaderLocation(shader, "viewPos");
 	int lightColorLoc = GetShaderLocation(shader, "lightColor");
 	int objectColorLoc = GetShaderLocation(shader, "objectColor");
+
 	Vector3 lightPos = { 0.0f, 4.0f, 0.0f };
 	Vector4 lightColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	Vector4 objectColor = { 0.5f, 0.5f, 0.5f, 1.0f };
-	Vector3 pozycjagluta = { 0,0,0 };
-	std::vector<punkty>siatka;
-	float rotacja = 0;
-
-	FilePathList droppedFiles;
 
 	Guzik Xplus{ "Menu/Xplus.png", {64, 32} };
 	Guzik Xmin{ "Menu/Xmin.png", {138, 32} };
@@ -58,6 +56,10 @@ int main() {
 	std::vector <czesc> czesci;
 	std::vector <std::string> txtFileNames;
 	std::vector<std::string> fileNames = listFilesInDirectory("model/", txtFileNames);
+	std::ifstream gcode;
+	std::string linia;
+	std::vector<punkty>siatka;
+	FilePathList droppedFiles;
 
 	for (int i = 0; i < fileNames.size(); i++) {
 		std::string fileName = fileNames[i];
@@ -116,10 +118,6 @@ int main() {
 		}
 
 	}
-
-	Ray filament_r;
-	filament_r.direction = { 1,0,0 };
-	filament_r.position = { 0,0,0 };
 
 	while (!WindowShouldClose()) {
 		rotationSH %= 360;
@@ -350,9 +348,6 @@ int main() {
 				}
 			}
 		}
-		//Vector3 draw_pos = { 275*0.01, (40+183)*0.01,  - 90 * 0.01};
-		//DrawSphere(draw_pos, 0.02, BLUE);
-		//279 y z 
 
 		DrawGrid(10, 1.0f);
 		EndMode3D();
